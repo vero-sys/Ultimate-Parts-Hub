@@ -11,9 +11,10 @@
    01. GLOBAL CONFIGURATION & STATE
    ========================================================================== */
 let ACTIVE_PARTS = [];
-let currentActiveTab = 'ADV 175';
+let currentActiveTab = null;
 let currentCategory = 'all';
 let searchQuery = '';
+let lastFocusedElement = null; // Accessibility: stores element to return focus after modal closes
 
 const SPREADSHEET_ID = '1gPudHIe2v5fHUnXyXQB43u0pVG3u05tNDjlbcaFqPiY';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbynjptVaj4ftkoSxjFrOzUrO1E0lttZ_7nMcCgq0UQ-nlXHTuEMKJvAX0cgErVZGh6E/exec';
@@ -68,11 +69,15 @@ function fetchSheetTab(tabName) {
   const statusEl = document.getElementById('catalogStatusCounter');
   const grid = document.getElementById('partsGrid');
   
-  if (statusEl) statusEl.textContent = `FETCHING '${tabName.toUpperCase()}' TAB...`;
+  if (statusEl) {
+    statusEl.textContent = `FETCHING '${tabName.toUpperCase()}' TAB...`;
+    statusEl.className = 'text-[10px] sm:text-[11px] font-mono text-amber-400 font-bold';
+  }
+
   if (grid) {
     grid.classList.remove('hidden');
     grid.innerHTML = `
-      <div class="col-span-full py-16 text-center text-slate-500 font-mono text-xs border border-dashed border-race-border rounded-2xl bg-race-card/40">
+      <div class="col-span-full py-16 text-center text-slate-400 font-mono text-xs border border-dashed border-race-border rounded-2xl bg-race-card/40">
         CONNECTING TO GOOGLE SHEETS // TAB: ${tabName}...
       </div>
     `;
@@ -85,7 +90,10 @@ function fetchSheetTab(tabName) {
   script.id = 'gviz-tab-script';
   script.src = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=responseHandler:handleSheetData&sheet=${encodeURIComponent(tabName)}`;
   script.onerror = () => {
-    if (statusEl) statusEl.textContent = `ERR: FAILED TO LOAD '${tabName}'`;
+    if (statusEl) {
+      statusEl.textContent = `ERR: FAILED TO LOAD '${tabName}'`;
+      statusEl.className = 'text-[10px] sm:text-[11px] font-mono text-rose-500 font-bold';
+    }
     ACTIVE_PARTS = [];
     discoverTabCategories();
     renderCatalog();
@@ -124,7 +132,7 @@ window.handleSheetData = function(json) {
 
       const rawPrice = getCell(r, 8).replace(/[^0-9.]/g, '');
       const price = parseFloat(rawPrice) || 0;
-      const id = `${currentActiveTab.replace(/\s+/g, '').toUpperCase()}-${String(index + 1).padStart(3, '0')}`;
+      const id = `${(currentActiveTab || 'PART').replace(/\s+/g, '').toUpperCase()}-${String(index + 1).padStart(3, '0')}`;
 
       return { id, category, name, specs, compatibility, material, description, link, image, price };
     });
@@ -135,7 +143,10 @@ window.handleSheetData = function(json) {
   } catch (err) {
     console.error("Tab parse error:", err);
     const statusEl = document.getElementById('catalogStatusCounter');
-    if (statusEl) statusEl.textContent = `ERR: PARSING DATA IN '${currentActiveTab}'`;
+    if (statusEl) {
+      statusEl.textContent = `ERR: PARSING DATA IN '${currentActiveTab}'`;
+      statusEl.className = 'text-[10px] sm:text-[11px] font-mono text-rose-500 font-bold';
+    }
     ACTIVE_PARTS = [];
     discoverTabCategories();
     renderCatalog();
@@ -158,12 +169,18 @@ function switchSheetTab(e, tabName) {
   currentCategory = 'all';
   searchQuery = '';
 
+  // Remove the attention-seeking border from the tab container
+  const tabGroup = document.getElementById('sheetTabGroup');
+  if (tabGroup) {
+    tabGroup.classList.remove('model-prompt-highlight');
+  }
+
   const dInput = document.getElementById('desktopSearchInput');
   const mInput = document.getElementById('mobileSearchInput');
   if (dInput) dInput.value = '';
   if (mInput) mInput.value = '';
 
-  // Immediate fail-safe: hide pioneer fallback whenever switching tabs
+  // Hide pioneer fallback until renderCatalog evaluates results
   const pioneerBox = document.getElementById('advPioneerFallback');
   if (pioneerBox) {
     pioneerBox.classList.add('hidden');
@@ -173,19 +190,21 @@ function switchSheetTab(e, tabName) {
   const submitSelect = document.getElementById('targetSheetTab');
   if (submitSelect) submitSelect.value = tabName;
 
-  // Update Tab Switcher UI styling
+  // Accessibility: Update Tab Switcher UI styling and aria-selected states
   document.querySelectorAll('#sheetTabGroup .sheet-tab-btn').forEach(btn => {
     const isTarget = btn.getAttribute('data-tab') === tabName;
-    const dot = btn.querySelector('.w-2');
+    const dot = btn.querySelector('.rounded-full');
     const tabNum = btn.querySelector('.font-mono:last-child');
 
+    btn.setAttribute('aria-selected', isTarget ? 'true' : 'false');
+
     if (isTarget) {
-      btn.className = 'sheet-tab-btn min-h-[44px] px-3.5 py-2.5 rounded-xl border border-rose-500/40 bg-rose-500/10 text-white font-bold flex items-center justify-between transition';
-      if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+      btn.className = 'sheet-tab-btn min-h-[48px] px-3.5 py-2.5 rounded-xl border border-rose-500/40 bg-rose-500/10 text-white font-bold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500';
+      if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
       if (tabNum) tabNum.className = 'text-[10px] text-rose-400 opacity-80 font-mono';
     } else {
-      btn.className = 'sheet-tab-btn min-h-[44px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition';
-      if (dot) dot.className = 'w-2 h-2 rounded-full bg-slate-600';
+      btn.className = 'sheet-tab-btn min-h-[48px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500';
+      if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-slate-600';
       if (tabNum) tabNum.className = 'text-[10px] text-slate-500 font-mono';
     }
   });
@@ -200,7 +219,7 @@ function discoverTabCategories() {
   const categories = Array.from(new Set(ACTIVE_PARTS.map(p => p.category).filter(Boolean)));
 
   container.innerHTML = `
-    <button type="button" onclick="filterCategory('all')" data-cat="all" class="cat-pill shrink-0 px-3 py-2 rounded-lg font-semibold bg-rose-600 text-white transition">
+    <button type="button" onclick="filterCategory('all')" data-cat="all" class="cat-pill shrink-0 min-h-[40px] px-3.5 py-2 rounded-lg font-semibold bg-rose-600 text-white transition focus:ring-2 focus:ring-rose-500">
       All Parts
     </button>
     ${categories.map(cat => `
@@ -208,7 +227,7 @@ function discoverTabCategories() {
         type="button" 
         onclick="filterCategory('${cat}')" 
         data-cat="${cat}" 
-        class="cat-pill shrink-0 px-3 py-2 rounded-lg font-semibold bg-[#161a25] text-slate-300 border border-race-border hover:border-rose-500/40 transition"
+        class="cat-pill shrink-0 min-h-[40px] px-3.5 py-2 rounded-lg font-semibold bg-[#161a25] text-slate-300 border border-race-border hover:border-rose-500/40 transition focus:ring-2 focus:ring-rose-500"
       >
         ${cat}
       </button>
@@ -221,9 +240,9 @@ function filterCategory(cat) {
 
   document.querySelectorAll('#categoryFilterContainer .cat-pill').forEach(btn => {
     if (btn.getAttribute('data-cat') === cat) {
-      btn.className = 'cat-pill shrink-0 px-3 py-2 rounded-lg font-semibold bg-rose-600 text-white transition';
+      btn.className = 'cat-pill shrink-0 min-h-[40px] px-3.5 py-2 rounded-lg font-semibold bg-rose-600 text-white transition focus:ring-2 focus:ring-rose-500';
     } else {
-      btn.className = 'cat-pill shrink-0 px-3 py-2 rounded-lg font-semibold bg-[#161a25] text-slate-300 border border-race-border hover:border-rose-500/40 transition';
+      btn.className = 'cat-pill shrink-0 min-h-[40px] px-3.5 py-2 rounded-lg font-semibold bg-[#161a25] text-slate-300 border border-race-border hover:border-rose-500/40 transition focus:ring-2 focus:ring-rose-500';
     }
   });
 
@@ -260,6 +279,17 @@ function renderCatalog() {
   const counter = document.getElementById('catalogStatusCounter');
   if (!grid) return;
 
+  // Guard: If no bike is picked yet, do not trigger the "No parts found" notice
+  if (!currentActiveTab) {
+    if (counter) {
+      counter.textContent = 'PLEASE SELECT A MOTORCYCLE MODEL';
+      counter.className = 'text-[10px] sm:text-[11px] font-mono text-amber-400 font-bold';
+    }
+    if (noResults) noResults.classList.add('hidden');
+    if (pioneerBox) pioneerBox.classList.add('hidden');
+    return;
+  }
+
   const filtered = ACTIVE_PARTS.filter(part => {
     const matchesCat = (currentCategory === 'all') || 
       (part.category || '').toLowerCase() === currentCategory.toLowerCase();
@@ -276,18 +306,18 @@ function renderCatalog() {
   });
 
   if (counter) {
+    counter.className = 'text-[10px] sm:text-[11px] font-mono text-slate-300';
     counter.textContent = `SHOWING ${filtered.length} OF ${ACTIVE_PARTS.length} [TAB: ${currentActiveTab.toUpperCase()}]`;
   }
 
-  // Handle No Results State
+  // Handle No Results State only when a tab is actively loaded
   if (filtered.length === 0) {
     grid.innerHTML = '';
-    grid.classList.add('hidden'); // Collapses the grid container so min-h-[300px] won't leave an empty space
+    grid.classList.add('hidden');
 
     if (noResults) {
       noResults.classList.remove('hidden');
 
-      // STRICT CHECK: Only reveal Sir JP Pioneer callout when on ADV 175
       if (pioneerBox) {
         if (currentActiveTab === 'ADV 175') {
           pioneerBox.classList.remove('hidden');
@@ -299,14 +329,13 @@ function renderCatalog() {
     return;
   }
 
-  // When parts exist, show grid and hide empty state & pioneer fallback
+  // When parts exist, show the grid
   grid.classList.remove('hidden');
   if (noResults) noResults.classList.add('hidden');
   if (pioneerBox) pioneerBox.classList.add('hidden');
 
   grid.innerHTML = filtered.map(part => `
-    <div class="bg-race-card rounded-2xl border border-race-border overflow-hidden flex flex-col group hover:border-rose-500/50 hover:shadow-xl hover:shadow-rose-500/5 transition-all duration-300">
-      
+    <article class="bg-race-card rounded-2xl border border-race-border overflow-hidden flex flex-col group hover:border-rose-500/50 hover:shadow-xl hover:shadow-rose-500/5 transition-all duration-300">
       <div class="relative h-44 sm:h-48 w-full bg-[#0d0f15] overflow-hidden">
         <img 
           src="${part.image}" 
@@ -316,13 +345,11 @@ function renderCatalog() {
           onerror="this.src='https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=600&q=80';"
         />
         <div class="absolute inset-0 bg-gradient-to-t from-race-card via-transparent to-black/30"></div>
-        
         <div class="absolute top-3 left-3 flex gap-1.5 font-mono">
           <span class="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide bg-black/60 backdrop-blur-md text-rose-400 border border-white/10">
             ${part.category}
           </span>
         </div>
-
         <div class="absolute top-3 right-3 font-mono">
           <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
             ${part.id}
@@ -354,24 +381,25 @@ function renderCatalog() {
             <button 
               type="button"
               onclick="openSpecsModal('${part.id}')"
-              class="w-full min-h-[38px] py-2 px-2.5 rounded-xl text-xs font-semibold bg-[#1d2230] hover:bg-[#252b3d] text-slate-200 border border-race-border transition flex items-center justify-center gap-1.5 active:scale-95"
+              class="w-full min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-semibold bg-[#1d2230] hover:bg-[#252b3d] text-slate-200 border border-race-border transition flex items-center justify-center gap-1.5 active:scale-95 focus:ring-2 focus:ring-rose-500"
+              aria-label="View technical specifications for ${part.name}"
             >
-              <i class="ph-bold ph-sliders-horizontal"></i> Specs
+              <i class="ph-bold ph-sliders-horizontal" aria-hidden="true"></i> Specs
             </button>
             <a 
               href="${part.link !== '#' ? part.link : 'https://shopee.ph'}" 
               target="_blank" 
               rel="noopener noreferrer" 
-              class="w-full min-h-[38px] py-2 px-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition flex items-center justify-center gap-1 shadow-sm shadow-rose-600/30 active:scale-95"
+              class="w-full min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition flex items-center justify-center gap-1 shadow-sm shadow-rose-600/30 active:scale-95 focus:ring-2 focus:ring-rose-500"
+              aria-label="Buy ${part.name} on online store"
             >
-              <span>Buy</span>
-              <i class="ph-bold ph-arrow-up-right text-xs"></i>
+              <span>Shopee</span>
+              <i class="ph-bold ph-arrow-up-right text-xs" aria-hidden="true"></i>
             </a>
           </div>
         </div>
-
       </div>
-    </div>
+    </article>
   `).join('');
 }
 
@@ -387,10 +415,12 @@ function renderIssues() {
       <button 
         type="button" 
         onclick="toggleAccordion('${issue.id}')" 
-        class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 hover:bg-white/[0.02] transition active:bg-white/5"
+        class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 hover:bg-white/[0.02] transition active:bg-white/5 focus:ring-2 focus:ring-rose-500"
+        aria-expanded="false"
+        aria-controls="content-${issue.id}"
       >
         <div class="flex items-start sm:items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+          <div class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0" aria-hidden="true">
             <i class="ph-bold ph-warning text-lg"></i>
           </div>
           <div>
@@ -405,21 +435,21 @@ function renderIssues() {
             <h3 class="text-xs sm:text-base font-bold text-white font-mono">${issue.title}</h3>
           </div>
         </div>
-        <i class="ph ph-caret-down text-lg text-slate-400 transition-transform duration-300 shrink-0" id="icon-${issue.id}"></i>
+        <i class="ph ph-caret-down text-lg text-slate-400 transition-transform duration-300 shrink-0" id="icon-${issue.id}" aria-hidden="true"></i>
       </button>
 
       <div id="content-${issue.id}" class="hidden border-t border-race-border p-4 sm:p-5 bg-[#0f111a] text-xs sm:text-sm space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 font-mono">
           <div class="bg-[#151924] p-3.5 rounded-lg border border-race-border">
             <div class="text-[11px] font-bold uppercase tracking-wider text-rose-400 mb-1 flex items-center gap-1.5">
-              <i class="ph-bold ph-waveform"></i> Symptoms
+              <i class="ph-bold ph-waveform" aria-hidden="true"></i> Symptoms
             </div>
             <p class="text-slate-300 leading-relaxed text-xs">${issue.symptoms}</p>
           </div>
 
           <div class="bg-[#151924] p-3.5 rounded-lg border border-race-border">
             <div class="text-[11px] font-bold uppercase tracking-wider text-amber-400 mb-1 flex items-center gap-1.5">
-              <i class="ph-bold ph-magnifying-glass"></i> Root Cause
+              <i class="ph-bold ph-magnifying-glass" aria-hidden="true"></i> Root Cause
             </div>
             <p class="text-slate-300 leading-relaxed text-xs">${issue.rootCause}</p>
           </div>
@@ -427,7 +457,7 @@ function renderIssues() {
 
         <div class="bg-[#151924] p-3.5 sm:p-4 rounded-lg border border-race-border space-y-2">
           <div class="text-[11px] font-bold font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-            <i class="ph-bold ph-wrench"></i> Field Fix Procedure
+            <i class="ph-bold ph-wrench" aria-hidden="true"></i> Field Fix Procedure
           </div>
           <div class="text-slate-300 leading-relaxed text-xs font-mono space-y-1">
             ${issue.solution}
@@ -441,23 +471,30 @@ function renderIssues() {
 function toggleAccordion(id) {
   const content = document.getElementById(`content-${id}`);
   const icon = document.getElementById(`icon-${id}`);
+  const triggerBtn = document.querySelector(`button[aria-controls="content-${id}"]`);
   if (!content) return;
 
-  if (content.classList.contains('hidden')) {
+  const isExpanded = content.classList.contains('hidden');
+  if (isExpanded) {
     content.classList.remove('hidden');
     if (icon) icon.classList.add('rotate-180');
+    if (triggerBtn) triggerBtn.setAttribute('aria-expanded', 'true');
   } else {
     content.classList.add('hidden');
     if (icon) icon.classList.remove('rotate-180');
+    if (triggerBtn) triggerBtn.setAttribute('aria-expanded', 'false');
   }
 }
 
 /* ==========================================================================
-   06. SPECIFICATIONS BLUEPRINT MODAL (SAFE NULL-CHECKED)
+   06. SPECIFICATIONS BLUEPRINT MODAL (ACCESSIBLE & FOCUS TRAPPED)
    ========================================================================== */
 function openSpecsModal(partId) {
   const part = ACTIVE_PARTS.find(p => p.id === partId);
   if (!part) return;
+
+  // Save the currently focused element to return focus after modal closes
+  lastFocusedElement = document.activeElement;
 
   const setElText = (id, text) => {
     const el = document.getElementById(id);
@@ -482,7 +519,7 @@ function openSpecsModal(partId) {
   if (fitmentContainer) {
     fitmentContainer.innerHTML = (part.compatibility || []).map(bike => `
       <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-[#1a1f2e] border border-race-border text-slate-300 flex items-center gap-1.5">
-        <i class="ph-bold ph-check text-rose-500"></i> ${bike}
+        <i class="ph-bold ph-check text-rose-500" aria-hidden="true"></i> ${bike}
       </span>
     `).join('');
   }
@@ -495,7 +532,10 @@ function openSpecsModal(partId) {
   setTimeout(() => {
     modal.classList.remove('opacity-0');
     box.classList.remove('scale-95');
-  }, 10);
+    // Shift keyboard & screen reader focus inside the dialog to the Close button
+    const closeBtn = document.getElementById('closeModalBtn') || modal.querySelector('button');
+    if (closeBtn) closeBtn.focus();
+  }, 40);
 }
 
 function closeSpecsModal() {
@@ -505,7 +545,13 @@ function closeSpecsModal() {
 
   modal.classList.add('opacity-0');
   box.classList.add('scale-95');
-  setTimeout(() => modal.classList.add('hidden'), 300);
+  setTimeout(() => {
+    modal.classList.add('hidden');
+    // Accessibility: Return focus back to the button that opened the modal
+    if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
+      lastFocusedElement.focus();
+    }
+  }, 300);
 }
 
 /* ==========================================================================
@@ -527,8 +573,18 @@ function toggleMobileMenu() {
 document.addEventListener('DOMContentLoaded', () => {
   renderIssues();
 
-  // Load the initial sheet tab cleanly without scrolling or jumping
-  switchSheetTab(null, 'ADV 175');
+  // Highlight tab switcher on load to guide the user
+  const tabGroup = document.getElementById('sheetTabGroup');
+  if (tabGroup) {
+    tabGroup.classList.add('model-prompt-highlight');
+  }
+  
+  // Set initial status prompt
+  const counter = document.getElementById('catalogStatusCounter');
+  if (counter) {
+    counter.textContent = 'PLEASE SELECT A MOTORCYCLE MODEL';
+    counter.className = 'text-[10px] sm:text-[11px] font-mono text-amber-400 font-bold';
+  }
 
   // Unified 9-Column Submission Form Dispatcher
   const form = document.getElementById('compatSubmitForm');
@@ -537,6 +593,21 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       const btn = document.getElementById('submitPartBtn');
       const status = document.getElementById('submissionStatus');
+
+      const linkVal = document.getElementById('partLink').value.trim();
+      const rawImage = document.getElementById('partImage').value.trim();
+
+      // Client-side guard: purchase link is mandatory
+      if (!linkVal) {
+        status.textContent = 'ERR: PURCHASE LINK IS REQUIRED';
+        status.className = 'text-xs text-rose-500 font-mono';
+        document.getElementById('partLink').focus();
+        return;
+      }
+
+      // Default placeholder image if no image URL was provided
+      const defaultPlaceholder = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=600&q=80';
+      const imageVal = rawImage.startsWith('http') ? rawImage : defaultPlaceholder;
 
       btn.disabled = true;
       status.textContent = 'COMMITTING TO TARGET TAB...';
@@ -550,8 +621,8 @@ document.addEventListener('DOMContentLoaded', () => {
         compatibility: document.getElementById('partCompatibility').value.trim(),
         material: document.getElementById('partMaterial').value.trim(),
         description: document.getElementById('partDescription').value.trim(),
-        link: document.getElementById('partLink').value.trim(),
-        image: document.getElementById('partImage').value.trim(),
+        link: linkVal,
+        image: imageVal,
         price: parseFloat(document.getElementById('partPrice').value) || 0
       };
 
@@ -571,6 +642,9 @@ document.addEventListener('DOMContentLoaded', () => {
           status.textContent = `SUCCESSFULLY LOGGED TO TAB: ${payload.sheetTab}`;
           status.className = 'text-xs text-emerald-400 font-mono';
           form.reset();
+		  
+		  // Reset custom category field visibility
+          handleCategorySelect(document.getElementById('partCategory').value);
           
           if (payload.sheetTab === currentActiveTab) {
             fetchSheetTab(currentActiveTab);
@@ -604,3 +678,22 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 });
+
+/* ==========================================================================
+   CATEGORY DROPDOWN & CUSTOM INPUT TOGGLE
+   ========================================================================== */
+function handleCategorySelect(val) {
+  const wrapper = document.getElementById('newCategoryWrapper');
+  const customInput = document.getElementById('customCategoryInput');
+  if (!wrapper || !customInput) return;
+
+  if (val === '__NEW_CATEGORY__') {
+    wrapper.classList.remove('hidden');
+    customInput.required = true;
+    customInput.focus();
+  } else {
+    wrapper.classList.add('hidden');
+    customInput.required = false;
+    customInput.value = '';
+  }
+}
