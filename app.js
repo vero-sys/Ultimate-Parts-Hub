@@ -84,9 +84,12 @@ window.handleSheetData = function(json) {
       const link          = getCell(r, 6) || '#';
 
       let image = getCell(r, 7).replace('.webpp', '.webp');
-      if (!image || !image.startsWith('http')) {
-        image = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=600&q=80';
-      }
+		if (!image || !image.startsWith('http')) {
+		  image = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=300&q=60';
+		} else {
+		  // Forces ANY external image down to 300px width and 70% quality WebP
+		  image = `https://wsrv.nl/?url=${encodeURIComponent(image)}&w=300&q=70&output=webp`;
+		}	  
 
       const rawPrice = getCell(r, 8).replace(/[^0-9.]/g, '');
       const price = parseFloat(rawPrice) || 0;
