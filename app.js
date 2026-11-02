@@ -119,22 +119,42 @@ function toggleMotorcycleDrawer(forceState = null) {
   const btn = document.getElementById('toggleModelsBtn');
   const icon = document.getElementById('modelsToggleIcon');
   const text = document.getElementById('modelsToggleText');
+  
+  // Bottom handle elements
+  const handleBtn = document.getElementById('mobileDrawerHandle');
+  const handleIcon = document.getElementById('handleIcon');
+  const handleText = document.getElementById('handleText');
+
   const totalTabs = document.querySelectorAll('#sheetTabGroup .sheet-tab-btn').length;
 
-  if (!wrapper || !btn || !icon || !text) return;
+  if (!wrapper) return;
 
   isModelDrawerExpanded = forceState !== null ? forceState : !isModelDrawerExpanded;
 
   if (isModelDrawerExpanded) {
     wrapper.style.maxHeight = wrapper.scrollHeight + 'px';
-    icon.classList.add('rotate-180');
-    text.textContent = 'Collapse';
-    btn.setAttribute('aria-expanded', 'true');
+    
+    // Desktop top button
+    if (icon) icon.classList.add('rotate-180');
+    if (text) text.textContent = 'Collapse';
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+
+    // Bottom handle
+    if (handleIcon) handleIcon.classList.add('rotate-180');
+    if (handleText) handleText.textContent = 'Collapse';
+    if (handleBtn) handleBtn.setAttribute('aria-expanded', 'true');
   } else {
     wrapper.style.maxHeight = '58px';
-    icon.classList.remove('rotate-180');
-    text.textContent = currentActiveTab ? `${currentActiveTab} (Change)` : `All Models (${totalTabs})`;
-    btn.setAttribute('aria-expanded', 'false');
+    
+    // Desktop top button
+    if (icon) icon.classList.remove('rotate-180');
+    if (text) text.textContent = currentActiveTab ? `${currentActiveTab} (Change)` : `All Models (${totalTabs})`;
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+
+    // Bottom handle
+    if (handleIcon) handleIcon.classList.remove('rotate-180');
+    if (handleText) handleText.textContent = currentActiveTab ? 'Change Model' : 'More Models';
+    if (handleBtn) handleBtn.setAttribute('aria-expanded', 'false');
   }
 }
 
