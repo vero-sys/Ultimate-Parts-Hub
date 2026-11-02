@@ -293,27 +293,26 @@ function resetActiveTabFilters() {
   filterCategory('all');
 }
 
+let isCatScrolling = false;
+
 function updateCategoryScrollFade(el) {
   if (window.innerWidth >= 640) return;
 
-  const maxScrollLeft = el.scrollWidth - el.clientWidth;
-  
-  if (maxScrollLeft <= 5) {
-    el.classList.remove('scroll-fade-right', 'scroll-fade-both', 'scroll-fade-left');
-    return;
-  }
-
-  const atStart = el.scrollLeft <= 10;
-  const atEnd = el.scrollLeft >= maxScrollLeft - 10;
-
-  el.classList.remove('scroll-fade-right', 'scroll-fade-both', 'scroll-fade-left');
-
-  if (atStart) {
-    el.classList.add('scroll-fade-right');
-  } else if (atEnd) {
-    el.classList.add('scroll-fade-left');
-  } else {
-    el.classList.add('scroll-fade-both');
+  if (!isCatScrolling) {
+    window.requestAnimationFrame(() => {
+      const maxScrollLeft = el.scrollWidth - el.clientWidth;
+      if (maxScrollLeft <= 5) {
+        el.classList.remove('scroll-fade-right', 'scroll-fade-both', 'scroll-fade-left');
+      } else if (el.scrollLeft <= 10) {
+        el.className = 'flex flex-nowrap overflow-x-auto sm:flex-wrap sm:overflow-visible gap-1.5 sm:gap-2 py-1 text-xs font-mono no-scrollbar scroll-fade-right';
+      } else if (el.scrollLeft >= maxScrollLeft - 10) {
+        el.className = 'flex flex-nowrap overflow-x-auto sm:flex-wrap sm:overflow-visible gap-1.5 sm:gap-2 py-1 text-xs font-mono no-scrollbar scroll-fade-left';
+      } else {
+        el.className = 'flex flex-nowrap overflow-x-auto sm:flex-wrap sm:overflow-visible gap-1.5 sm:gap-2 py-1 text-xs font-mono no-scrollbar scroll-fade-both';
+      }
+      isCatScrolling = false;
+    });
+    isCatScrolling = true;
   }
 }
 
@@ -404,69 +403,40 @@ function renderCatalog() {
   if (noResults) noResults.classList.add('hidden');
   if (pioneerBox) pioneerBox.classList.add('hidden');
 
+  
+  
   grid.innerHTML = filtered.map(part => `
-    <article class="bg-race-card rounded-2xl border border-race-border overflow-hidden flex flex-col group hover:border-rose-500/50 hover:shadow-xl hover:shadow-rose-500/5 transition-all duration-300">
-      <div class="relative h-44 sm:h-48 w-full bg-[#0d0f15] overflow-hidden">
-        <img 
-          src="${part.image}" 
-          alt="${part.name}" 
-          loading="lazy"
-          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          onerror="this.src='https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=600&q=80';"
-        />
-        <div class="absolute inset-0 bg-gradient-to-t from-race-card via-transparent to-black/30"></div>
-        <div class="absolute top-3 left-3 flex gap-1.5 font-mono">
-          <span class="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide bg-black/60 backdrop-blur-md text-rose-400 border border-white/10">
-            ${part.category}
-          </span>
+    <article onclick="openSpecsModal('${part.id}')" class="bg-race-card rounded-xl sm:rounded-2xl border border-race-border overflow-hidden flex flex-col justify-between group hover:border-rose-500/50 hover:shadow-xl hover:shadow-rose-500/5 transition-all duration-300 cursor-pointer">
+      <div>
+        <div class="relative h-28 sm:h-48 w-full bg-[#0d0f15] overflow-hidden">
+          <img src="${part.image}" alt="${part.name}" loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=600&q=80';"/>
+          <div class="absolute inset-0 bg-gradient-to-t from-race-card via-transparent to-black/30"></div>
+          <div class="absolute top-2 left-2 flex gap-1 font-mono">
+            <span class="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded text-[9px] sm:text-[10px] font-bold tracking-tight bg-black/70 backdrop-blur-md text-rose-400 border border-white/10 truncate max-w-[85px] sm:max-w-none">${part.category}</span>
+          </div>
+          <div class="absolute top-2 right-2 font-mono">
+            <span class="px-1.5 py-0.5 rounded text-[8px] sm:text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">${part.id}</span>
+          </div>
         </div>
-        <div class="absolute top-3 right-3 font-mono">
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400/20 text-amber-300 border border-amber-400/30">
-            ${part.id}
-          </span>
+        <div class="p-2.5 sm:p-5 space-y-1.5 sm:space-y-3 font-mono">
+          <div class="flex items-center justify-between text-[10px] sm:text-xs text-slate-400">
+            <span class="truncate max-w-[55px] sm:max-w-none">${part.material}</span>
+            <span class="text-rose-400 font-bold truncate max-w-[65px] sm:max-w-none">${part.compatibility[0] || currentActiveTab}</span>
+          </div>
+          <h3 class="font-bold text-white text-xs sm:text-base leading-tight group-hover:text-rose-400 transition-colors line-clamp-2">${part.name}</h3>
+          <p class="text-[10px] sm:text-xs text-slate-400 line-clamp-1 sm:line-clamp-2 leading-tight">${part.specs}</p>
         </div>
       </div>
-
-      <div class="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-4 font-mono">
-        <div>
-          <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
-            <span>${part.material}</span>
-            <span class="text-rose-400 font-bold">${part.compatibility[0] || currentActiveTab}</span>
+      <div class="p-2.5 sm:p-5 pt-0 font-mono">
+        <div class="pt-2 border-t border-race-border/80">
+          <div class="flex items-baseline justify-between mb-2">
+            <span class="text-[9px] sm:text-[11px] text-slate-400">PRICE</span>
+            <span class="text-xs sm:text-lg font-bold text-white">${part.price > 0 ? `₱${part.price.toLocaleString()}` : 'OEM SPEC'}</span>
           </div>
-          <h3 class="font-bold text-white text-sm sm:text-base leading-snug group-hover:text-rose-400 transition-colors">
-            ${part.name}
-          </h3>
-          <p class="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">
-            ${part.specs}
-          </p>
-        </div>
-
-        <div class="pt-3 border-t border-race-border">
-          <div class="flex items-baseline justify-between mb-3">
-            <span class="text-[11px] text-slate-400">ESTIMATE / SRP</span>
-            <span class="text-base sm:text-lg font-bold text-white">${part.price > 0 ? `₱${part.price.toLocaleString()}` : 'OEM SPEC'}</span>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2">
-            <button 
-              type="button"
-              onclick="openSpecsModal('${part.id}')"
-              class="w-full min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-semibold bg-[#1d2230] hover:bg-[#252b3d] text-slate-200 border border-race-border transition flex items-center justify-center gap-1.5 active:scale-95 focus:ring-2 focus:ring-rose-500"
-              aria-label="View technical specifications for ${part.name}"
-            >
-              <i class="ph-bold ph-sliders-horizontal" aria-hidden="true"></i> Specs
-            </button>
-            <a 
-              href="${part.link !== '#' ? part.link : 'https://shopee.ph'}" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              class="w-full min-h-[44px] py-2 px-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition flex items-center justify-center gap-1 shadow-sm shadow-rose-600/30 active:scale-95 focus:ring-2 focus:ring-rose-500"
-              aria-label="Buy ${part.name} on online store"
-            >
-              <span>Shopee</span>
-              <i class="ph-bold ph-arrow-up-right text-xs" aria-hidden="true"></i>
-            </a>
-          </div>
+          <a href="${part.link !== '#' ? part.link : 'https://shopee.ph'}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="w-full min-h-[38px] sm:min-h-[44px] py-1.5 px-3 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition flex items-center justify-center gap-1.5 shadow-sm shadow-rose-600/30 active:scale-95 focus:ring-2 focus:ring-rose-500 truncate" aria-label="Buy ${part.name} on Shopee">
+            <span class="truncate">Open</span>
+            <i class="ph-bold ph-arrow-up-right text-[10px] sm:text-xs shrink-0" aria-hidden="true"></i>
+          </a>
         </div>
       </div>
     </article>
@@ -551,17 +521,24 @@ function toggleMobileMenu() {
   if (menu) menu.classList.toggle('hidden');
 }
 
-function handleScrollTopVisibility() {
-  const btn = document.getElementById('scrollTopBtn');
-  if (!btn) return;
+let isScrolling = false;
 
-  // Reveal when user scrolls down past 400px
-  if (window.scrollY > 400) {
-    btn.classList.remove('translate-y-16', 'opacity-0', 'pointer-events-none');
-    btn.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
-  } else {
-    btn.classList.add('translate-y-16', 'opacity-0', 'pointer-events-none');
-    btn.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+function handleScrollTopVisibility() {
+  if (!isScrolling) {
+    window.requestAnimationFrame(() => {
+      const btn = document.getElementById('scrollTopBtn');
+      if (btn) {
+        if (window.scrollY > 400) {
+          btn.classList.remove('translate-y-16', 'opacity-0', 'pointer-events-none');
+          btn.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+        } else {
+          btn.classList.add('translate-y-16', 'opacity-0', 'pointer-events-none');
+          btn.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+        }
+      }
+      isScrolling = false;
+    });
+    isScrolling = true;
   }
 }
 
