@@ -154,3 +154,22 @@ textarea:focus {
   opacity: 1;
   pointer-events: auto;
 }
+
+/* Unselected prompt border & subtle pulsing glow */
+.model-prompt-highlight {
+  border: 1px dashed rgba(245, 158, 11, 0.6);
+  background-color: rgba(245, 158, 11, 0.05);
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.15);
+  animation: promptPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes promptPulse {
+  0%, 100% {
+    border-color: rgba(245, 158, 11, 0.6);
+    box-shadow: 0 0 16px rgba(245, 158, 11, 0.18);
+  }
+  50% {
+    border-color: rgba(245, 158, 11, 0.25);
+    box-shadow: 0 0 6px rgba(245, 158, 11, 0.05);
+  }
+}
