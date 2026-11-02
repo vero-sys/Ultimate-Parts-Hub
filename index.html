@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- Accessibility: unrestricted viewport scaling -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ultimate // Paddock Spec & Multi-Tab Parts Registry</title>
+  <title>The Ultimate Compatible Parts Hub for Non Big-4 Motorcycles </title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -54,33 +55,40 @@
           </div>
           <div>
             <div class="flex items-center gap-1.5">
-              <span class="font-mono text-base sm:text-xl font-bold tracking-tight text-white leading-tight">ENDGAME<span class="text-rose-500"> HUB</span></span>
+              <span class="font-mono text-base sm:text-xl font-bold tracking-tight text-white leading-tight">PARTS<span class="text-rose-500"> HUB</span></span>
             </div>
-            <p class="text-[10px] sm:text-[11px] text-slate-400 font-mono hidden xs:block">Parts Interchange Registry</p>
+            <p class="text-[10px] sm:text-[11px] text-slate-400 font-mono hidden xs:block">All Parts</p>
           </div>
         </a>
 
-        <!-- High-Contrast Desktop Search Field -->
+        <!-- High-Contrast Desktop Search Field (Distinct ID: desktopSearchInput) -->
         <div class="flex-1 max-w-lg hidden md:block">
           <div class="relative">
-            <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" aria-hidden="true"></i>
-			<input 
-			  id="mobileSearchInput"
-			  type="text" 
-			  placeholder="Search active sheet parts..." 
-			  aria-label="Search parts catalog"
-			  class="w-full bg-[#161a25] border border-slate-700/80 rounded-xl pl-9 pr-8 py-2.5 text-base sm:text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-rose-500 font-mono shadow-inner"
-			  oninput="handleSearch(this.value)"
-			/>
+            <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base" aria-hidden="true"></i>
+            <input 
+              id="desktopSearchInput"
+              type="text" 
+              placeholder="Search active sheet by part name, donor OEM, or specs..." 
+              aria-label="Search parts catalog by keyword, OEM, or specification"
+              class="w-full bg-[#161a25] border border-slate-700/80 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition font-mono shadow-inner"
+              oninput="handleSearch(this.value)"
+            />
             <kbd class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono bg-white/10 border border-white/15 px-1.5 py-0.5 rounded text-slate-400 shadow-sm">/</kbd>
           </div>
         </div>
 
-        <!-- Navigation Links -->
-        <nav class="hidden xl:flex items-center gap-2 font-medium text-xs font-mono text-slate-300">
-          <a href="#catalog" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition flex items-center gap-1.5">
-            <i class="ph ph-cube"></i> Parts
+        <!-- Navigation Links: Paddock Style Registry Pill Beside Add Part -->
+        <nav class="hidden md:flex items-center gap-2 font-mono">
+          <a 
+            href="#catalog" 
+            class="group relative inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-200 bg-[#161a25] hover:bg-[#1d2230] border border-race-border hover:border-rose-500/50 shadow-sm transition-all duration-200 active:scale-95"
+            aria-label="Jump to Parts Registry"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 group-hover:shadow-[0_0_8px_#ff1837] transition-shadow"></span>
+            <i class="ph-bold ph-cube text-rose-500 group-hover:scale-110 transition-transform"></i>
+            <span>Parts</span>
           </a>
+        </nav>
 
         <!-- Right Action Button: Add Part -->
         <div class="flex items-center gap-2">
@@ -105,14 +113,15 @@
 
       </div>
 
-      <!-- Mobile Search Field (font size 16px to prevent iOS auto-zoom) -->
+      <!-- Mobile Search Field -->
       <div class="pb-3 md:hidden">
         <div class="relative">
-          <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" aria-hidden="true"></i>
           <input 
             id="mobileSearchInput"
             type="text" 
             placeholder="Search active sheet parts..." 
+            aria-label="Search active sheet parts"
             class="w-full bg-[#161a25] border border-slate-700/80 rounded-xl pl-9 pr-8 py-2.5 text-base sm:text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-rose-500 font-mono shadow-inner"
             oninput="handleSearch(this.value)"
           />
@@ -120,11 +129,10 @@
       </div>
     </div>
 
-    <!-- Mobile Drawer -->
+    <!-- Mobile Drawer (Cleaned: Known Issues removed) -->
     <div id="mobileMenu" class="hidden xl:hidden border-t border-race-border bg-[#0c0e15] px-4 py-3 space-y-2 text-xs font-mono">
-      <a href="#catalog" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-lg hover:bg-white/5 text-slate-200">01 // Parts Registry</a>
-      <a href="#known-issues" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-lg hover:bg-white/5 text-slate-200">02 // Diagnostics & TSB</a>
-      <a href="#submit-entry" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-lg bg-rose-600/10 text-rose-400 font-bold border border-rose-500/20">03 // + Add Part</a>
+      <a href="#catalog" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-lg hover:bg-white/5 text-slate-200">Compatibile Parts</a>
+      <a href="#submit-entry" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-lg bg-rose-600/10 text-rose-400 font-bold border border-rose-500/20">Add Parts</a>
     </div>
   </header>
 
@@ -139,7 +147,7 @@
         The Ultimate <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-rose-400 to-amber-400">Compatible Parts</span>
       </h1>
       <p class="mt-3 text-xs sm:text-sm md:text-base text-slate-400 max-w-2xl mx-auto px-2">
-        Hindi Big 3 motor mo? Don't worry this is the ultimate endgame Compatible parts list for <strong>Motorstar</strong>, <strong>Rusi</strong>, and <strong>Euro Motor</strong>
+        Hindi Big 4 motor mo? China Bike? Don't worry this is the ultimate endgame Compatible parts list for <strong>Motorstar</strong>, <strong>Rusi</strong>, and <strong>Euro Motor</strong>
       </p>
     </div>
   </section>
@@ -150,7 +158,7 @@
     <!-- ==================== SECTION 1: PARTS CATALOG ==================== -->
     <section id="catalog" class="space-y-4 sm:space-y-6">
       
-      <!-- Catalog Heading -->
+       <!-- Catalog Heading -->
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-2 sm:gap-4">
         <div>
           <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-rose-500 font-mono">
@@ -164,114 +172,157 @@
       <!-- DYNAMIC TAB SELECTION & CATEGORY BAR -->
       <div class="bg-race-card p-4 sm:p-6 rounded-2xl border border-race-border space-y-4 sm:space-y-5 shadow-lg">
         
-        <!-- ROW 1: GOOGLE SHEET TABS (CHASSIS / MODEL) -->
-        <div class="space-y-2">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+        <!-- ROW 1: GOOGLE SHEET TABS (EXPANDABLE MOTORCYCLE REGISTRY) -->
+        <div class="space-y-2.5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div class="flex items-center gap-2">
-              <i class="ph-bold ph-tabs text-amber-400 text-sm"></i>
-              <label class="text-[11px] font-mono uppercase tracking-wider text-slate-300 font-semibold">Select Sheet Tab (Motorcycle Model)</label>
+              <i class="ph-bold ph-tabs text-amber-400 text-sm" aria-hidden="true"></i>
+              <label class="text-[11px] font-mono uppercase tracking-wider text-slate-300 font-semibold">
+                Select Sheet Tab (Motorcycle Model)
+              </label>
             </div>
-            <!-- Initial Status: Amber prompt -->
-            <span 
-			  class="text-[10px] sm:text-[11px] font-mono text-amber-400 font-bold" 
-			  id="catalogStatusCounter"
-			  role="status"
-			  aria-live="polite"
-			>
-			  PLEASE SELECT A MOTORCYCLE MODEL
-			</span>
+
+            <div class="flex items-center gap-2.5 self-start sm:self-auto flex-wrap">
+              <!-- Live polite status readout -->
+              <span 
+                class="text-[10px] sm:text-[11px] font-mono text-amber-400 font-bold" 
+                id="catalogStatusCounter"
+                role="status"
+                aria-live="polite"
+              >
+                PLEASE SELECT A MOTORCYCLE MODEL
+              </span>
+
+              <!-- Expand / Collapse Toggle Button with Pinging Amber Beacon -->
+              <button 
+                type="button" 
+                id="toggleModelsBtn"
+                onclick="toggleMotorcycleDrawer()" 
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-[#161a25] hover:bg-[#202636] border border-amber-500/50 text-amber-300 shadow-sm shadow-amber-500/10 transition-all active:scale-95 focus:ring-2 focus:ring-amber-500"
+                aria-expanded="false"
+                aria-controls="sheetTabWrapper"
+              >
+                <span class="relative flex h-2 w-2" id="modelPromptBeacon">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
+                </span>
+                
+                <span id="modelsToggleText">All Models (3)</span>
+                <i class="ph-bold ph-caret-down text-xs transition-transform duration-300" id="modelsToggleIcon" aria-hidden="true"></i>
+              </button>
+            </div>
           </div>
 
-          <!-- Note: model-prompt-highlight is included directly on load -->
+          <!-- Collapsible Container (No clipping dashed border on outer box) -->
           <div 
-			  class="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono text-xs transition-all duration-300 rounded-2xl p-1.5 model-prompt-highlight" 
-			  id="sheetTabGroup"
-			  role="tablist"
-			  aria-label="Motorcycle Models"
-			>
-			  <!-- ADV 175 -->
-			  <button 
-				type="button" 
-				role="tab"
-				aria-selected="false"
-				id="tab-adv175"
-				aria-controls="partsGrid"
-				onclick="switchSheetTab(event, 'ADV 175')" 
-				data-tab="ADV 175" 
-				class="sheet-tab-btn min-h-[48px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500"
-			  >
-				<span class="flex items-center gap-2">
-				  <span class="w-2.5 h-2.5 rounded-full bg-slate-600" aria-hidden="true"></span>
-				  MOTORSTAR ADV 175
-				</span>
-				<span class="text-[10px] text-slate-500 font-mono">[Tab 1]</span>
-			  </button>
+            id="sheetTabWrapper"
+            class="max-h-[58px] overflow-hidden transition-all duration-300 ease-in-out p-0.5"
+          >
+            <div 
+              class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 font-mono text-xs" 
+              id="sheetTabGroup"
+              role="tablist"
+              aria-label="Motorcycle Models"
+            >
+              <!-- ADV 175 -->
+              <button 
+                type="button" 
+                role="tab"
+                aria-selected="false"
+                id="tab-adv175"
+                aria-controls="partsGrid"
+                onclick="switchSheetTab(event, 'ADV 175')" 
+                data-tab="ADV 175" 
+                class="sheet-tab-btn min-h-[48px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500"
+              >
+                <span class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-slate-600" aria-hidden="true"></span>
+                  MOTORSTAR ADV 175
+                </span>
+                <span class="text-[10px] text-slate-500 font-mono">[Tab 1]</span>
+              </button>
 
-			  <!-- TVX 150 -->
-			  <button 
-				type="button" 
-				role="tab"
-				aria-selected="false"
-				id="tab-tvx150"
-				aria-controls="partsGrid"
-				onclick="switchSheetTab(event, 'TVX 150')" 
-				data-tab="TVX 150" 
-				class="sheet-tab-btn min-h-[48px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500"
-			  >
-				<span class="flex items-center gap-2">
-				  <span class="w-2.5 h-2.5 rounded-full bg-slate-600" aria-hidden="true"></span>
-				  MOTORSTAR TVX 150
-				</span>
-				<span class="text-[10px] text-slate-500 font-mono">[Tab 2]</span>
-			  </button>
+              <!-- TVX 150 -->
+              <button 
+                type="button" 
+                role="tab"
+                aria-selected="false"
+                id="tab-tvx150"
+                aria-controls="partsGrid"
+                onclick="switchSheetTab(event, 'TVX 150')" 
+                data-tab="TVX 150" 
+                class="sheet-tab-btn min-h-[48px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500"
+              >
+                <span class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-slate-600" aria-hidden="true"></span>
+                  MOTORSTAR TVX 150
+                </span>
+                <span class="text-[10px] text-slate-500 font-mono">[Tab 2]</span>
+              </button>
 
-			  <!-- Griffin 180i -->
-			  <button 
-				type="button" 
-				role="tab"
-				aria-selected="false"
-				id="tab-griffin180i"
-				aria-controls="partsGrid"
-				onclick="switchSheetTab(event, 'Griffin 180i')" 
-				data-tab="Griffin 180i" 
-				class="sheet-tab-btn min-h-[48px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500"
-			  >
-				<span class="flex items-center gap-2">
-				  <span class="w-2.5 h-2.5 rounded-full bg-slate-600" aria-hidden="true"></span>
-				  EURO MOTOR GRIFFIN 180I
-				</span>
-				<span class="text-[10px] text-slate-500 font-mono">[Tab 3]</span>
-			  </button>
-			</div>
+              <!-- Griffin 180i -->
+              <button 
+                type="button" 
+                role="tab"
+                aria-selected="false"
+                id="tab-griffin180i"
+                aria-controls="partsGrid"
+                onclick="switchSheetTab(event, 'Griffin 180i')" 
+                data-tab="Griffin 180i" 
+                class="sheet-tab-btn min-h-[48px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500"
+              >
+                <span class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-slate-600" aria-hidden="true"></span>
+                  EURO MOTOR GRIFFIN 180I
+                </span>
+                <span class="text-[10px] text-slate-500 font-mono">[Tab 3]</span>
+              </button>
+            </div>
+          </div>
         </div>
 
-        <!-- ROW 2: ACTIVE TAB SUBSYSTEM CATEGORIES (TOUCH SCROLLABLE ON MOBILE) -->
+        <!-- ROW 2: ACTIVE TAB SUBSYSTEM CATEGORIES (SCROLL ON MOBILE, WRAP ON DESKTOP) -->
         <div class="space-y-2 pt-2 border-t border-race-border/60">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-2">
-              <i class="ph-bold ph-funnel text-amber-400 text-sm"></i>
-              <label class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Subsystem Categories</label>
+              <i class="ph-bold ph-funnel text-amber-400 text-sm" aria-hidden="true"></i>
+              <label class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+                Subsystem Categories
+              </label>
             </div>
             <button 
-			  type="button" 
-			  onclick="resetActiveTabFilters()" 
-			  aria-label="Reset subsystem category filters"
-			  class="text-[11px] font-mono text-slate-400 hover:text-rose-400 transition flex items-center gap-1.5 min-h-[44px] px-2 active:scale-95"
-			>
-			  <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i> Reset
-			</button>
+              type="button" 
+              onclick="resetActiveTabFilters()" 
+              aria-label="Reset subsystem category filters"
+              class="text-[11px] font-mono text-slate-400 hover:text-rose-400 transition flex items-center gap-1.5 min-h-[40px] px-2 active:scale-95"
+            >
+              <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i> Reset
+            </button>
           </div>
 
-          <!-- Horizontally scrollable on mobile for seamless navigation -->
-          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 text-xs font-mono" id="categoryFilterContainer">
-            <button type="button" onclick="filterCategory('all')" data-cat="all" class="cat-pill shrink-0 px-3 py-2 rounded-lg font-semibold bg-rose-600 text-white transition">All Parts</button>
-            <!-- Injected dynamically from active sheet tab rows -->
+          <!-- Scroll wrapper with progressive mobile edge fade mask -->
+          <div class="category-scroll-wrapper">
+            <div 
+              id="categoryFilterContainer"
+              class="flex flex-nowrap overflow-x-auto sm:flex-wrap sm:overflow-visible gap-1.5 sm:gap-2 py-1 text-xs font-mono no-scrollbar scroll-fade-right"
+              onscroll="updateCategoryScrollFade(this)"
+            >
+              <button 
+                type="button" 
+                onclick="filterCategory('all')" 
+                data-cat="all" 
+                class="cat-pill shrink-0 min-h-[40px] px-3.5 py-2 rounded-lg font-semibold bg-rose-600 text-white transition focus:ring-2 focus:ring-rose-500"
+              >
+                All Parts
+              </button>
+              <!-- Populated dynamically via app.js -->
+            </div>
           </div>
         </div>
 
-      </div>
+      </div> <!-- Closes bg-race-card selector container cleanly -->
 
-      <!-- Parts Grid Container (Visible on load with Motorcycle Picker Prompt) -->
+      <!-- Parts Grid Container (Visible on load with Initial Prompt Card) -->
       <div id="partsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 min-h-[300px]">
         <div class="col-span-full py-16 px-4 text-center text-slate-400 font-mono text-xs border border-dashed border-amber-500/40 rounded-2xl bg-amber-500/5 flex flex-col items-center justify-center gap-3">
           <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl shadow-inner">
@@ -287,7 +338,7 @@
       <!-- No Parts Found Section with Embedded Sir JP Pioneer Archive Callout -->
       <div id="noResultsNotice" class="hidden text-center py-10 px-4 sm:px-10 bg-race-card rounded-2xl border border-race-border space-y-6">
         <div class="flex flex-col items-center justify-center space-y-2">
-          <i class="ph ph-magnifying-glass-minus text-4xl text-slate-500 mb-1 inline-block"></i>
+          <i class="ph ph-magnifying-glass-minus text-4xl text-slate-500 mb-1 inline-block" aria-hidden="true"></i>
           <h3 class="text-base sm:text-lg font-bold text-white font-mono">No components match your filter</h3>
           <p class="text-xs sm:text-sm text-slate-400 font-mono">Try another search term or click 'All Parts' for this tab.</p>
           <div class="pt-2">
@@ -297,7 +348,7 @@
           </div>
         </div>
 
-        <!-- Strict ADV 175 Pioneer Archive Callout (Centered + Amber Accent) -->
+        <!-- Strict ADV 175 Pioneer Archive Callout -->
         <div id="advPioneerFallback" class="hidden p-5 sm:p-6 rounded-xl bg-[#0f1118] border border-amber-500/30 font-mono shadow-md text-center max-w-2xl mx-auto">
           <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-2xl mx-auto mb-3">
             <i class="ph-bold ph-medal"></i>
@@ -328,22 +379,7 @@
 	
     </section>
 
-    <!-- ==================== SECTION 2: FIELD DIAGNOSTICS ==================== -->
-    <!-- <section id="known-issues" class="space-y-4 sm:space-y-6"> -->
-      <!-- <div> -->
-        <!-- <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-rose-500 font-mono"> -->
-          <!-- <i class="ph-bold ph-shield-warning"></i> FAIL-SAFE TECHNICAL SERVICE BULLETIN -->
-        <!-- </div> -->
-        <!-- <h2 class="text-xl sm:text-3xl font-bold text-white tracking-tight mt-1 font-mono">Field Diagnostics & Mechanic Solutions</h2> -->
-        <!-- <p class="text-xs sm:text-sm text-slate-400 mt-1">Diagnose low-speed shudder, brake fade, and electrical regulator overheating.</p> -->
-      <!-- </div> -->
-
-      <!-- <div class="space-y-3" id="issuesContainer"> -->
-        <!-- Injected dynamically via app.js -->
-      <!-- </div> -->
-    <!-- </section> -->
-
-    <!-- ==================== SECTION 3: LOG FITMENT SUBMISSION FORM ==================== -->
+    <!-- ==================== SECTION 2: LOG FITMENT SUBMISSION FORM ==================== -->
     <section id="submit-entry" class="p-4 sm:p-8 rounded-2xl bg-race-card border border-race-border space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-race-border pb-4 gap-2">
         <div>
@@ -357,7 +393,7 @@
       </div>
 
       <form id="compatSubmitForm" class="space-y-4 font-mono">
-        <!-- Row 1: Target Model, Subsystem Category, Part Name -->
+        <!-- Row 1: Target Model, Subsystem Category (with Custom Category support), Part Name -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
           <div>
             <label class="text-xs text-slate-400 block mb-1">TARGET CHASSIS (SHEET TAB)</label>
@@ -387,7 +423,8 @@
               <option value="Fuel System & Intake">Fuel System & Intake</option>
               <option value="__NEW_CATEGORY__" class="text-amber-400 font-bold">+ Other / Create New Category...</option>
             </select>
-			<!-- Custom Category Input (Hidden until "+ Other" is picked) -->
+
+            <!-- Custom Category Input (Revealed only when + Other is picked) -->
             <div id="newCategoryWrapper" class="hidden mt-2">
               <input 
                 type="text" 
@@ -423,7 +460,7 @@
           </div>
         </div>
 
-        <!-- Row 3: Product Link, Direct Image URL, Price SRP -->
+        <!-- Row 3: Product Link (Mandatory), Direct Image URL (Optional), Price SRP -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
           <div>
             <label class="text-xs text-slate-400 block mb-1">
@@ -436,7 +473,7 @@
             <label class="text-xs text-slate-400 block mb-1">
               IMAGE URL (COL H) <span class="text-slate-500 text-[10px]">(OPTIONAL)</span>
             </label>
-            <!-- REMOVED 'required' BELOW -->
+            <!-- Completely optional: no required attribute -->
             <input type="url" id="partImage" name="image" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" placeholder="https://images.unsplash.com/... (leave blank for default)" autocomplete="off">
           </div>
 
@@ -459,22 +496,22 @@
           <button type="submit" id="submitPartBtn" class="w-full sm:w-auto px-6 py-3 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition flex items-center justify-center gap-2 shadow-lg shadow-rose-600/30 active:scale-95">
             <i class="ph-bold ph-paper-plane-tilt text-sm"></i> TRANSMIT ENTRY TO SHEET
           </button>
-          <span id="submissionStatus" class="text-xs text-slate-500 text-center sm:text-right">READY FOR DISPATCH</span>
+          <span id="submissionStatus" class="text-xs text-slate-500 text-center sm:text-right font-mono">READY FOR DISPATCH</span>
         </div>
       </form>
     </section>
 
   </main>
 
-  <!-- ==================== SPECIFICATIONS MODAL (MOBILE RESPONSIVE) ==================== -->
+  <!-- ==================== SPECIFICATIONS MODAL (ACCESSIBLE DIALOG) ==================== -->
   <div 
-	  id="specsModal" 
-	  role="dialog"
-	  aria-modal="true"
-	  aria-labelledby="modalTitle"
-	  aria-describedby="modalDesc"
-	  class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden opacity-0 transition-opacity duration-300"
-	>
+    id="specsModal" 
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modalTitle"
+    aria-describedby="modalDesc"
+    class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden opacity-0 transition-opacity duration-300"
+  >
     <div class="bg-race-card border border-race-border w-full max-w-xl max-h-[90vh] flex flex-col rounded-2xl overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300" id="modalBox">
       
       <!-- Modal Header -->
@@ -489,13 +526,13 @@
           </div>
         </div>
         <button 
-		  id="closeModalBtn"
-		  onclick="closeSpecsModal()" 
-		  class="w-11 h-11 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center transition active:scale-95" 
-		  aria-label="Close dialog"
-		>
-		  <i class="ph-bold ph-x text-lg" aria-hidden="true"></i>
-		</button>
+          id="closeModalBtn"
+          onclick="closeSpecsModal()" 
+          class="w-11 h-11 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center transition active:scale-95" 
+          aria-label="Close dialog"
+        >
+          <i class="ph-bold ph-x text-lg" aria-hidden="true"></i>
+        </button>
       </div>
 
       <!-- Modal Body (Independently Scrollable) -->
@@ -535,21 +572,21 @@
       <!-- Modal Footer -->
       <div class="p-4 bg-[#11141c] border-t border-race-border flex items-center justify-between gap-3 font-mono shrink-0">
         <button 
-		  onclick="closeSpecsModal()" 
-		  class="flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-medium text-slate-300 bg-white/5 hover:bg-white/10 transition active:scale-95 text-center"
-		>
-		  Close
-		</button>
-		<a 
-		  id="modalShopBtn" 
-		  href="#" 
-		  target="_blank" 
-		  rel="noopener noreferrer" 
-		  class="flex-1 sm:flex-none min-h-[44px] px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/30 active:scale-95"
-		>
-		  <span>Check Price / Shopee</span>
-		  <i class="ph-bold ph-arrow-up-right text-xs" aria-hidden="true"></i>
-</a>
+          onclick="closeSpecsModal()" 
+          class="flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-medium text-slate-300 bg-white/5 hover:bg-white/10 transition active:scale-95 text-center"
+        >
+          Close
+        </button>
+        <a 
+          id="modalShopBtn" 
+          href="#" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          class="flex-1 sm:flex-none min-h-[44px] px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/30 active:scale-95"
+        >
+          <span>Check Price / Shopee</span>
+          <i class="ph-bold ph-arrow-up-right text-xs" aria-hidden="true"></i>
+        </a>
       </div>
 
     </div>
@@ -564,12 +601,27 @@
         <span>• Multi-Tab Edition</span>
       </div>
       <p class="text-slate-500">
-        Verified Racing Telemetry & Compatibility Registry.
+        Made by Sir Jonathan For All China Bike Users in the Philippines.
       </p>
     </div>
   </footer>
 
   <!-- External Application Logic -->
   <script src="app.js"></script>
+  
+  <!-- Floating Scroll To Top Button -->
+  <button 
+    type="button" 
+    id="scrollTopBtn"
+    onclick="scrollToTop()"
+    class="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-2xl bg-[#161a25]/90 hover:bg-rose-600 border border-race-border hover:border-rose-500/50 text-slate-300 hover:text-white shadow-xl shadow-black/50 backdrop-blur-md flex items-center justify-center transition-all duration-300 translate-y-16 opacity-0 pointer-events-none active:scale-95 focus:ring-2 focus:ring-rose-500 focus:outline-none group"
+    aria-label="Scroll back to top"
+  >
+    <i class="ph-bold ph-caret-up text-lg group-hover:-translate-y-0.5 transition-transform duration-200" aria-hidden="true"></i>
+  </button>
+
+  <!-- External Application Logic -->
+  <script src="app.js"></script></body>
+  
 </body>
 </html>
