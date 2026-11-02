@@ -279,6 +279,27 @@
               </button>
             </div>
           </div>
+		  
+			<!-- Bottom Full-Width "--- v ---" Pull Handle -->
+          <button 
+            type="button" 
+            id="mobileDrawerHandle"
+            onclick="toggleMotorcycleDrawer()" 
+            class="w-full py-2.5 px-4 flex items-center justify-center gap-3 text-slate-400 hover:text-white hover:bg-white/5 active:bg-white/10 rounded-xl transition-all duration-200 group focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer"
+            aria-expanded="false"
+            aria-label="Expand or collapse motorcycle model registry"
+          >
+            <span class="h-px bg-slate-700/80 group-hover:bg-rose-500/50 flex-1 transition-colors"></span>
+            
+            <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#161a25] border border-race-border group-hover:border-rose-500/40 text-[11px] font-mono font-bold tracking-wider text-slate-300 group-hover:text-white transition-all shadow-sm">
+              <span id="handleText" class="uppercase">More Models</span>
+              <i class="ph-bold ph-caret-down text-xs transition-transform duration-300" id="handleIcon" aria-hidden="true"></i>
+            </div>
+            
+            <span class="h-px bg-slate-700/80 group-hover:bg-rose-500/50 flex-1 transition-colors"></span>
+          </button>
+        </div>
+		  
         </div>
 
         <!-- ROW 2: ACTIVE TAB SUBSYSTEM CATEGORIES (SCROLL ON MOBILE, WRAP ON DESKTOP) -->
