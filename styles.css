@@ -1,0 +1,156 @@
+/* ==========================================================================
+   ENDGAME GY6HUB // PADDOCK RACE SPEC & MULTI-TAB ARCHITECTURE
+   STYLESHEET: styles.css
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   01. DESIGN TOKENS & ROOT PROPERTIES
+   -------------------------------------------------------------------------- */
+:root {
+  --color-race-red: #ff1837;
+  --color-race-red-glow: rgba(255, 24, 55, 0.35);
+  --color-accent-amber: #f59e0b;
+  --color-accent-amber-glow: rgba(245, 158, 11, 0.25);
+  --color-accent-green: #10b981;
+  --color-accent-cyan: #06b6d4;
+
+  --bg-surface: #0b0d13;
+  --bg-card: #12151e;
+  --bg-card-hover: #181d2a;
+  --border-subtle: #1f2432;
+  --border-highlight: #2c3345;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: 'Space Grotesk', monospace;
+}
+
+/* --------------------------------------------------------------------------
+   02. BASE RESETS & SCROLLBAR
+   -------------------------------------------------------------------------- */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background-color: var(--bg-surface);
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-race-red);
+}
+
+/* Hide scrollbar for clean horizontal category scrolling on mobile */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* --------------------------------------------------------------------------
+   03. GLOW EFFECTS & VISUAL ACCENTS
+   -------------------------------------------------------------------------- */
+.badge-glow {
+  box-shadow: 0 0 15px var(--color-race-red-glow);
+}
+
+.badge-glow-amber {
+  box-shadow: 0 0 15px var(--color-accent-amber-glow);
+}
+
+.hero-glow-radial {
+  background: radial-gradient(ellipse 80% 80% at 50% -20%, rgba(255, 24, 55, 0.14), transparent);
+}
+
+/* --------------------------------------------------------------------------
+   04. FORM & INPUT CONTROLS (MOBILE SAFEGUARD)
+   -------------------------------------------------------------------------- */
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="url"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-race-red);
+  box-shadow: 0 0 0 1px var(--color-race-red);
+}
+
+/* --------------------------------------------------------------------------
+   05. MULTI-TAB SWITCHER BUTTONS & DYNAMIC CATEGORY PILLS
+   -------------------------------------------------------------------------- */
+.sheet-tab-btn,
+.cat-pill {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Unselected Sheet Tab Hover */
+.sheet-tab-btn:hover:not(.border-rose-500\/40) {
+  border-color: rgba(255, 255, 255, 0.25);
+  background-color: var(--bg-card-hover);
+  color: #ffffff;
+}
+
+/* Active Tab Glow Indicator */
+.sheet-tab-btn.border-rose-500\/40 span span {
+  box-shadow: 0 0 8px var(--color-race-red);
+}
+
+/* Category Pills Transition */
+.cat-pill:hover:not(.bg-rose-600) {
+  border-color: rgba(255, 24, 55, 0.4);
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   06. EMBEDDED SIR JP PIONEER ARCHIVE CALLOUT (EMPTY STATE FALLBACK)
+   -------------------------------------------------------------------------- */
+#advPioneerFallback {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#advPioneerFallback:hover {
+  border-color: rgba(245, 158, 11, 0.55);
+  background-color: #131620;
+}
+
+/* --------------------------------------------------------------------------
+   07. MODAL ANIMATION FIXTURES
+   -------------------------------------------------------------------------- */
+#specsModal {
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#modalBox {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#specsModal.opacity-0 {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#specsModal:not(.opacity-0) {
+  opacity: 1;
+  pointer-events: auto;
+}

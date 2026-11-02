@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>ENDGAME GY6HUB // Paddock Spec & Multi-Tab Parts Registry</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Phosphor Icons CDN -->
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
+  <!-- Google Fonts: Inter & Space Grotesk -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['Space Grotesk', 'monospace'],
+          },
+          colors: {
+            race: {
+              red: '#ff1837',
+              amber: '#f59e0b',
+              surface: '#0b0d13',
+              card: '#12151e',
+              cardhover: '#181d2a',
+              border: '#1f2432',
+              borderaccent: '#2c3345',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-race-surface text-slate-200 font-sans antialiased selection:bg-rose-600 selection:text-white min-h-screen flex flex-col overflow-x-hidden">
+
+  <!-- ==================== TOP NAVIGATION ==================== -->
+  <header class="sticky top-0 z-40 bg-[#0b0d13]/95 backdrop-blur-md border-b border-race-border shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20 gap-3 sm:gap-6">
+        
+        <!-- Brand Logo -->
+        <a href="#" class="flex items-center gap-2.5 sm:gap-3 shrink-0 group">
+          <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-rose-600 to-rose-400 flex items-center justify-center text-white font-black text-xl shadow-md shadow-rose-600/30 group-hover:scale-105 transition-transform">
+            <i class="ph-bold ph-gauge text-lg sm:text-xl"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-mono text-base sm:text-xl font-bold tracking-tight text-white leading-tight">ENDGAME<span class="text-rose-500"> HUB</span></span>
+            </div>
+            <p class="text-[10px] sm:text-[11px] text-slate-400 font-mono hidden xs:block">Parts Interchange Registry</p>
+          </div>
+        </a>
+
+        <!-- High-Contrast Desktop Search Field -->
+        <div class="flex-1 max-w-lg hidden md:block">
+          <div class="relative">
+            <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
+            <input 
+              id="desktopSearchInput"
+              type="text" 
+              placeholder="Search active sheet by part name, donor OEM, or specs..." 
+              class="w-full bg-[#161a25] border border-slate-700/80 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition font-mono shadow-inner"
+              oninput="handleSearch(this.value)"
+            />
+            <kbd class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono bg-white/10 border border-white/15 px-1.5 py-0.5 rounded text-slate-400 shadow-sm">/</kbd>
+          </div>
+        </div>
+
+        <!-- Navigation Links -->
+        <nav class="hidden xl:flex items-center gap-2 font-medium text-xs font-mono text-slate-300">
+          <a href="#catalog" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition flex items-center gap-1.5">
+            <i class="ph ph-cube"></i> Parts
+          </a>
+          <a href="#known-issues" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition flex items-center gap-1.5">
+            <i class="ph ph-wrench"></i> Diagnostics
+          </a>
+        </nav>
+
+        <!-- Right Action Button: Add Part -->
+        <div class="flex items-center gap-2">
+          <button 
+            type="button" 
+            onclick="scrollToSection('submit-entry')" 
+            class="inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl text-xs font-mono font-bold bg-rose-600 text-white hover:bg-rose-500 shadow-md shadow-rose-600/30 transition hover:scale-[1.02] active:scale-95"
+          >
+            <i class="ph-bold ph-plus text-sm"></i>
+            <span>Add Part</span>
+          </button>
+          
+          <button 
+            type="button" 
+            onclick="toggleMobileMenu()" 
+            class="p-2 sm:p-2.5 rounded-xl text-slate-400 hover:text-white bg-[#161a25] border border-race-border xl:hidden active:bg-white/10 transition"
+            aria-label="Toggle mobile menu"
+          >
+            <i class="ph ph-list text-xl" id="menuIcon"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Mobile Search Field (font size 16px to prevent iOS auto-zoom) -->
+      <div class="pb-3 md:hidden">
+        <div class="relative">
+          <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <input 
+            id="mobileSearchInput"
+            type="text" 
+            placeholder="Search active sheet parts..." 
+            class="w-full bg-[#161a25] border border-slate-700/80 rounded-xl pl-9 pr-8 py-2.5 text-base sm:text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-rose-500 font-mono shadow-inner"
+            oninput="handleSearch(this.value)"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div id="mobileMenu" class="hidden xl:hidden border-t border-race-border bg-[#0c0e15] px-4 py-3 space-y-2 text-xs font-mono">
+      <a href="#catalog" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-lg hover:bg-white/5 text-slate-200">01 // Parts Registry</a>
+      <a href="#known-issues" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-lg hover:bg-white/5 text-slate-200">02 // Diagnostics & TSB</a>
+      <a href="#submit-entry" onclick="toggleMobileMenu()" class="block px-3 py-2.5 rounded-lg bg-rose-600/10 text-rose-400 font-bold border border-rose-500/20">03 // + Add Part</a>
+    </div>
+  </header>
+
+  <!-- ==================== HERO HEADER ==================== -->
+  <section class="relative border-b border-race-border overflow-hidden bg-gradient-to-b from-[#131724] to-[#0b0d13] py-8 sm:py-14">
+    <div class="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(255,24,55,0.14),rgba(255,255,255,0))]"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-[11px] sm:text-xs font-mono mb-3">
+        <i class="ph-bold ph-tabs"></i> Created by Sir Jonathan
+      </div>
+      <h1 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight max-w-4xl mx-auto leading-tight font-mono">
+        The Ultimate <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-rose-400 to-amber-400">Endgame Compatible Parts</span>
+      </h1>
+      <p class="mt-3 text-xs sm:text-sm md:text-base text-slate-400 max-w-2xl mx-auto px-2">
+        Hindi Big 3 motor mo? Don't worry this is the ultimate endgame Compatible parts list for <strong>Motorstar</strong>, <strong>Rusi</strong>, and <strong>Euro Motor</strong>
+      </p>
+    </div>
+  </section>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="flex-grow max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 w-full space-y-12 sm:space-y-16">
+
+    <!-- ==================== SECTION 1: PARTS CATALOG ==================== -->
+    <section id="catalog" class="space-y-4 sm:space-y-6">
+      
+      <!-- Catalog Heading -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-2 sm:gap-4">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-rose-500 font-mono">
+            <i class="ph-bold ph-cube"></i> Competition Parts Masterlist
+          </div>
+          <h2 class="text-xl sm:text-3xl font-bold text-white tracking-tight mt-1 font-mono">Parts Interchange Registry</h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Select a motorcycle sheet tab to switch datasets, then filter by component subsystem.</p>
+        </div>
+      </div>
+
+      <!-- DYNAMIC TAB SELECTION & CATEGORY BAR -->
+      <div class="bg-race-card p-4 sm:p-6 rounded-2xl border border-race-border space-y-4 sm:space-y-5 shadow-lg">
+        
+        <!-- ROW 1: GOOGLE SHEET TABS (CHASSIS / MODEL) -->
+        <div class="space-y-2">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+            <div class="flex items-center gap-2">
+              <i class="ph-bold ph-tabs text-rose-500 text-sm"></i>
+              <label class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Select Sheet Tab (Motorcycle Model)</label>
+            </div>
+            <span class="text-[10px] sm:text-[11px] font-mono text-slate-500" id="catalogStatusCounter">CONNECTING TO GOOGLE SHEETS...</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono text-xs" id="sheetTabGroup">
+            <button 
+              type="button" 
+              onclick="switchSheetTab(event, 'ADV 175')" 
+              data-tab="ADV 175" 
+              class="sheet-tab-btn min-h-[44px] px-3.5 py-2.5 rounded-xl border border-rose-500/40 bg-rose-500/10 text-white font-bold flex items-center justify-between transition"
+            >
+              <span class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                MOTORSTAR ADV 175
+              </span>
+              <span class="text-[10px] text-rose-400 opacity-80 font-mono">[Tab 1]</span>
+            </button>
+
+            <button 
+              type="button" 
+              onclick="switchSheetTab(event, 'TVX 150')" 
+              data-tab="TVX 150" 
+              class="sheet-tab-btn min-h-[44px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition"
+            >
+              <span class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+                MOTORSTAR TVX 150
+              </span>
+              <span class="text-[10px] text-slate-500 font-mono">[Tab 2]</span>
+            </button>
+
+            <button 
+              type="button" 
+              onclick="switchSheetTab(event, 'Griffin 180i')" 
+              data-tab="Griffin 180i" 
+              class="sheet-tab-btn min-h-[44px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition"
+            >
+              <span class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-slate-600"></span>
+                EURO MOTOR GRIFFIN 180I
+              </span>
+              <span class="text-[10px] text-slate-500 font-mono">[Tab 3]</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ROW 2: ACTIVE TAB SUBSYSTEM CATEGORIES (TOUCH SCROLLABLE ON MOBILE) -->
+        <div class="space-y-2 pt-2 border-t border-race-border/60">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <i class="ph-bold ph-funnel text-amber-400 text-sm"></i>
+              <label class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Subsystem Categories</label>
+            </div>
+            <button 
+              type="button" 
+              onclick="resetActiveTabFilters()" 
+              class="text-[11px] font-mono text-slate-400 hover:text-rose-400 transition flex items-center gap-1 active:scale-95"
+            >
+              <i class="ph ph-arrow-counter-clockwise"></i> Reset
+            </button>
+          </div>
+
+          <!-- Horizontally scrollable on mobile for seamless navigation -->
+          <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 text-xs font-mono" id="categoryFilterContainer">
+            <button type="button" onclick="filterCategory('all')" data-cat="all" class="cat-pill shrink-0 px-3 py-2 rounded-lg font-semibold bg-rose-600 text-white transition">All Parts</button>
+            <!-- Injected dynamically from active sheet tab rows -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Parts Grid Container -->
+      <div id="partsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 min-h-[300px]">
+        <div class="col-span-full py-16 text-center text-slate-500 font-mono text-xs border border-dashed border-race-border rounded-2xl bg-race-card/40">
+          FETCHING DATA FOR ACTIVE SHEET TAB...
+        </div>
+      </div>
+
+      <!-- No Parts Found Section with Embedded Sir JP Pioneer Archive Callout -->
+      <div id="noResultsNotice" class="hidden text-center py-10 px-4 sm:px-10 bg-race-card rounded-2xl border border-race-border space-y-6">
+        <div class="flex flex-col items-center justify-center space-y-2">
+          <i class="ph ph-magnifying-glass-minus text-4xl text-slate-500 mb-1 inline-block"></i>
+          <h3 class="text-base sm:text-lg font-bold text-white font-mono">No components match your filter</h3>
+          <p class="text-xs sm:text-sm text-slate-400 font-mono">Try another search term or click 'All Parts' for this tab.</p>
+          <div class="pt-2">
+            <button type="button" onclick="resetActiveTabFilters()" class="px-5 py-2.5 bg-rose-600 text-white text-xs font-mono font-bold rounded-xl hover:bg-rose-500 transition shadow-md shadow-rose-600/20 active:scale-95">
+              Clear Active Filters
+            </button>
+          </div>
+        </div>
+
+        <!-- Strict ADV 175 Pioneer Archive Callout (Centered + Amber Accent) -->
+        <div id="advPioneerFallback" class="hidden p-5 sm:p-6 rounded-xl bg-[#0f1118] border border-amber-500/30 font-mono shadow-md text-center max-w-2xl mx-auto">
+          <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center justify-center text-2xl mx-auto mb-3">
+            <i class="ph-bold ph-medal"></i>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 mb-2">
+            <span class="text-xs font-bold text-white uppercase tracking-wider">SIR JP PIONEER ARCHIVE // MOTORSTAR ADV 175</span>
+            <span class="text-[10px] bg-amber-400/20 text-amber-300 px-2 py-0.5 rounded border border-amber-400/30 font-bold">VERIFIED SPEC</span>
+          </div>
+
+          <p class="text-xs text-slate-400 leading-relaxed max-w-lg mx-auto mb-4">
+            Looking for ADV 175 parts? You can cross-reference the 250+ part masterlist compiled by Sir JP at <a href="https://er175-hub.vercel.app/" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:underline font-bold">er175-hub.vercel.app</a>.
+          </p>
+
+          <div class="flex justify-center">
+            <a 
+              href="https://er175-hub.vercel.app/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-[#1d2230] hover:bg-amber-500 hover:text-black border border-amber-500/40 text-amber-400 transition shadow-sm active:scale-95"
+            >
+              <span>Open Full Hub</span>
+              <i class="ph-bold ph-arrow-square-out text-sm"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+	
+    </section>
+
+    <!-- ==================== SECTION 2: FIELD DIAGNOSTICS ==================== -->
+    <!-- <section id="known-issues" class="space-y-4 sm:space-y-6"> -->
+      <!-- <div> -->
+        <!-- <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-rose-500 font-mono"> -->
+          <!-- <i class="ph-bold ph-shield-warning"></i> FAIL-SAFE TECHNICAL SERVICE BULLETIN -->
+        <!-- </div> -->
+        <!-- <h2 class="text-xl sm:text-3xl font-bold text-white tracking-tight mt-1 font-mono">Field Diagnostics & Mechanic Solutions</h2> -->
+        <!-- <p class="text-xs sm:text-sm text-slate-400 mt-1">Diagnose low-speed shudder, brake fade, and electrical regulator overheating.</p> -->
+      <!-- </div> -->
+
+      <!-- <div class="space-y-3" id="issuesContainer"> -->
+        <!-- Injected dynamically via app.js -->
+      <!-- </div> -->
+    <!-- </section> -->
+
+    <!-- ==================== SECTION 3: LOG FITMENT SUBMISSION FORM ==================== -->
+    <section id="submit-entry" class="p-4 sm:p-8 rounded-2xl bg-race-card border border-race-border space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-race-border pb-4 gap-2">
+        <div>
+          <span class="text-xs font-mono font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="ph-bold ph-cloud-arrow-up"></i> Direct Sheet Commit
+          </span>
+          <h2 class="text-xl sm:text-2xl font-bold text-white mt-1 font-mono">Log Verified Compatible Part</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Appends user-tested fitment data directly across all columns in the active Google Sheet tab.</p>
+        </div>
+        <span class="text-[10px] font-mono px-2 py-1 bg-amber-400/10 border border-amber-400/20 text-amber-400 rounded self-start sm:self-auto">STAGE COMMIT</span>
+      </div>
+
+      <form id="compatSubmitForm" class="space-y-4 font-mono">
+        <!-- Row 1: Target Model, Subsystem Category, Part Name -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">TARGET CHASSIS (SHEET TAB)</label>
+            <select id="targetSheetTab" name="targetSheet" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" required>
+              <option value="ADV 175">Motorstar ADV 175</option>
+              <option value="TVX 150">Motorstar TVX 150</option>
+              <option value="Griffin 180i">Euro Motor Griffin 180i</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">CATEGORY (COL A)</label>
+            <select id="partCategory" name="category" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" required>
+              <option value="CVT & Transmission">CVT & Transmission</option>
+              <option value="Electrical & Stator">Electrical & Stator</option>
+              <option value="Braking System">Braking System</option>
+              <option value="Engine & Cylinder">Engine & Cylinder</option>
+              <option value="Suspension & Chassis">Suspension & Chassis</option>
+              <option value="Fuel System & Intake">Fuel System & Intake</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">PART NAME / OEM CODE (COL B)</label>
+            <input type="text" id="partName" name="partName" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" placeholder="e.g. K97 Driven Face Pulley Kit" required autocomplete="off">
+          </div>
+        </div>
+
+        <!-- Row 2: Specs, Compatibility Donors, Material -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">FITMENT SPECS / CLEARANCE (COL C)</label>
+            <input type="text" id="partSpecs" name="specs" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" placeholder="e.g. 20x15mm flyball, 15mm pin" required autocomplete="off">
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">COMPATIBILITY (COL D - COMMA SEPARATED)</label>
+            <input type="text" id="partCompatibility" name="compatibility" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" placeholder="e.g. ADV 175, PCX 150, Click 150i" required autocomplete="off">
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">MATERIAL / COMPOUND (COL E)</label>
+            <input type="text" id="partMaterial" name="material" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" placeholder="e.g. Billet Aluminum, Sintered Bronze" required autocomplete="off">
+          </div>
+        </div>
+
+        <!-- Row 3: Product Link, Direct Image URL, Price SRP -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">PURCHASE LINK / URL (COL G)</label>
+            <input type="url" id="partLink" name="link" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" placeholder="https://shopee.ph/..." required autocomplete="off">
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">IMAGE URL (COL H)</label>
+            <input type="url" id="partImage" name="image" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" placeholder="https://images.unsplash.com/..." required autocomplete="off">
+          </div>
+
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">ESTIMATE SRP / PRICE (₱) (COL I)</label>
+            <input type="number" id="partPrice" name="price" step="1" min="0" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" placeholder="1250" required autocomplete="off">
+          </div>
+        </div>
+
+        <!-- Row 4: Maintenance & Field Installation Notes -->
+        <div>
+          <label class="text-xs text-slate-400 block mb-1">DESCRIPTION / MAINTENANCE NOTES (COL F)</label>
+          <textarea id="partDescription" name="description" rows="3" class="w-full bg-[#161a25] border border-race-border rounded-xl p-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" placeholder="Installation advice, washer placement, break-in procedures..." required></textarea>
+        </div>
+
+        <!-- Submit Row -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2">
+          <button type="submit" id="submitPartBtn" class="w-full sm:w-auto px-6 py-3 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition flex items-center justify-center gap-2 shadow-lg shadow-rose-600/30 active:scale-95">
+            <i class="ph-bold ph-paper-plane-tilt text-sm"></i> TRANSMIT ENTRY TO SHEET
+          </button>
+          <span id="submissionStatus" class="text-xs text-slate-500 text-center sm:text-right">READY FOR DISPATCH</span>
+        </div>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- ==================== SPECIFICATIONS MODAL (MOBILE RESPONSIVE) ==================== -->
+  <div id="specsModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden opacity-0 transition-opacity duration-300">
+    <div class="bg-race-card border border-race-border w-full max-w-xl max-h-[90vh] flex flex-col rounded-2xl overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300" id="modalBox">
+      
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-race-border flex items-center justify-between bg-[#171b26] shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-lg bg-rose-500/20 text-rose-500 flex items-center justify-center shrink-0">
+            <i class="ph-bold ph-wrench text-xl"></i>
+          </div>
+          <div>
+            <h3 id="modalTitle" class="text-sm sm:text-base font-bold text-white font-mono line-clamp-1">Part Specification Blueprint</h3>
+            <p id="modalSubtitle" class="text-[11px] text-slate-400 font-mono">Paddock Interchange Specs</p>
+          </div>
+        </div>
+        <button onclick="closeSpecsModal()" class="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition active:scale-95" aria-label="Close modal">
+          <i class="ph-bold ph-x text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Independently Scrollable) -->
+      <div class="p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto">
+        
+        <div class="flex flex-col sm:flex-row gap-4 items-center bg-[#10131c] p-3.5 sm:p-4 rounded-xl border border-race-border">
+          <img id="modalImage" src="" alt="Part Preview" class="w-full sm:w-28 h-40 sm:h-28 object-cover rounded-lg border border-race-border shrink-0">
+          <div class="space-y-2 flex-1 text-center sm:text-left w-full">
+            <div class="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 font-mono">
+              <span id="modalCategory" class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-400">CATEGORY</span>
+              <span id="modalId" class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-400/20 text-amber-300 font-mono">PART-001</span>
+            </div>
+            <div id="modalPrice" class="text-xl sm:text-2xl font-bold font-mono text-white">₱0.00</div>
+            <p id="modalDesc" class="text-xs text-slate-400 leading-relaxed font-mono"></p>
+          </div>
+        </div>
+
+        <!-- Technical Specs -->
+        <div class="space-y-2 font-mono text-xs">
+          <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Engineering Specs</h4>
+          <div class="bg-[#181d2a] p-3 rounded-lg border border-race-border flex justify-between items-center">
+            <span class="text-slate-400">Material / Compound:</span>
+            <span id="modalSpecMaterial" class="text-white font-bold">--</span>
+          </div>
+        </div>
+
+        <!-- Confirmed Fitments -->
+        <div class="space-y-2 font-mono">
+          <h4 class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Compatible Models</h4>
+          <div id="modalFitmentPills" class="flex flex-wrap gap-1.5 text-xs">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-[#11141c] border-t border-race-border flex items-center justify-between gap-3 font-mono shrink-0">
+        <button onclick="closeSpecsModal()" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-medium text-slate-300 bg-white/5 hover:bg-white/10 transition active:scale-95 text-center">
+          Close
+        </button>
+        <a id="modalShopBtn" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/30 active:scale-95">
+          <span>Check Price / Buy</span>
+          <i class="ph-bold ph-arrow-up-right text-xs"></i>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="mt-16 sm:mt-20 border-t border-race-border bg-[#0a0c10] text-slate-400 text-xs py-8 sm:py-10 font-mono">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+      <div class="flex items-center justify-center sm:justify-start gap-2">
+        <div class="w-6 h-6 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-xs">E</div>
+        <span class="text-slate-200 font-bold">ENDGAME GY6HUB</span>
+        <span>• Multi-Tab Edition</span>
+      </div>
+      <p class="text-slate-500">
+        Verified Racing Telemetry & Compatibility Registry.
+      </p>
+    </div>
+  </footer>
+
+  <!-- External Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
