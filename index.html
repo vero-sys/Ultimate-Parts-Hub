@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-  <title>ENDGAME GY6HUB // Paddock Spec & Multi-Tab Parts Registry</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ultimate // Paddock Spec & Multi-Tab Parts Registry</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -63,14 +63,15 @@
         <!-- High-Contrast Desktop Search Field -->
         <div class="flex-1 max-w-lg hidden md:block">
           <div class="relative">
-            <i class="ph-bold ph-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-base"></i>
-            <input 
-              id="desktopSearchInput"
-              type="text" 
-              placeholder="Search active sheet by part name, donor OEM, or specs..." 
-              class="w-full bg-[#161a25] border border-slate-700/80 rounded-xl pl-10 pr-10 py-2.5 text-sm text-white placeholder:text-slate-400 focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 transition font-mono shadow-inner"
-              oninput="handleSearch(this.value)"
-            />
+            <i class="ph-bold ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm" aria-hidden="true"></i>
+			<input 
+			  id="mobileSearchInput"
+			  type="text" 
+			  placeholder="Search active sheet parts..." 
+			  aria-label="Search parts catalog"
+			  class="w-full bg-[#161a25] border border-slate-700/80 rounded-xl pl-9 pr-8 py-2.5 text-base sm:text-xs text-white placeholder:text-slate-400 focus:outline-none focus:border-rose-500 font-mono shadow-inner"
+			  oninput="handleSearch(this.value)"
+			/>
             <kbd class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono bg-white/10 border border-white/15 px-1.5 py-0.5 rounded text-slate-400 shadow-sm">/</kbd>
           </div>
         </div>
@@ -80,10 +81,6 @@
           <a href="#catalog" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition flex items-center gap-1.5">
             <i class="ph ph-cube"></i> Parts
           </a>
-          <a href="#known-issues" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition flex items-center gap-1.5">
-            <i class="ph ph-wrench"></i> Diagnostics
-          </a>
-        </nav>
 
         <!-- Right Action Button: Add Part -->
         <div class="flex items-center gap-2">
@@ -139,7 +136,7 @@
         <i class="ph-bold ph-tabs"></i> Created by Sir Jonathan
       </div>
       <h1 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight max-w-4xl mx-auto leading-tight font-mono">
-        The Ultimate <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-rose-400 to-amber-400">Endgame Compatible Parts</span>
+        The Ultimate <span class="text-transparent bg-clip-text bg-gradient-to-r from-rose-500 via-rose-400 to-amber-400">Compatible Parts</span>
       </h1>
       <p class="mt-3 text-xs sm:text-sm md:text-base text-slate-400 max-w-2xl mx-auto px-2">
         Hindi Big 3 motor mo? Don't worry this is the ultimate endgame Compatible parts list for <strong>Motorstar</strong>, <strong>Rusi</strong>, and <strong>Euro Motor</strong>
@@ -157,10 +154,10 @@
       <div class="flex flex-col md:flex-row md:items-end justify-between gap-2 sm:gap-4">
         <div>
           <div class="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-rose-500 font-mono">
-            <i class="ph-bold ph-cube"></i> Competition Parts Masterlist
+            <i class="ph-bold ph-cube"></i> Compatible Parts Masterlist
           </div>
-          <h2 class="text-xl sm:text-3xl font-bold text-white tracking-tight mt-1 font-mono">Parts Interchange Registry</h2>
-          <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Select a motorcycle sheet tab to switch datasets, then filter by component subsystem.</p>
+          <h2 class="text-xl sm:text-3xl font-bold text-white tracking-tight mt-1 font-mono">Select your Motorcycle</h2>
+          <p class="text-xs sm:text-sm text-slate-400 mt-0.5">Select a motorcycle then filter per category.</p>
         </div>
       </div>
 
@@ -171,52 +168,81 @@
         <div class="space-y-2">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
             <div class="flex items-center gap-2">
-              <i class="ph-bold ph-tabs text-rose-500 text-sm"></i>
-              <label class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Select Sheet Tab (Motorcycle Model)</label>
+              <i class="ph-bold ph-tabs text-amber-400 text-sm"></i>
+              <label class="text-[11px] font-mono uppercase tracking-wider text-slate-300 font-semibold">Select Sheet Tab (Motorcycle Model)</label>
             </div>
-            <span class="text-[10px] sm:text-[11px] font-mono text-slate-500" id="catalogStatusCounter">CONNECTING TO GOOGLE SHEETS...</span>
+            <!-- Initial Status: Amber prompt -->
+            <span 
+			  class="text-[10px] sm:text-[11px] font-mono text-amber-400 font-bold" 
+			  id="catalogStatusCounter"
+			  role="status"
+			  aria-live="polite"
+			>
+			  PLEASE SELECT A MOTORCYCLE MODEL
+			</span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono text-xs" id="sheetTabGroup">
-            <button 
-              type="button" 
-              onclick="switchSheetTab(event, 'ADV 175')" 
-              data-tab="ADV 175" 
-              class="sheet-tab-btn min-h-[44px] px-3.5 py-2.5 rounded-xl border border-rose-500/40 bg-rose-500/10 text-white font-bold flex items-center justify-between transition"
-            >
-              <span class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-rose-500"></span>
-                MOTORSTAR ADV 175
-              </span>
-              <span class="text-[10px] text-rose-400 opacity-80 font-mono">[Tab 1]</span>
-            </button>
+          <!-- Note: model-prompt-highlight is included directly on load -->
+          <div 
+			  class="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono text-xs transition-all duration-300 rounded-2xl p-1.5 model-prompt-highlight" 
+			  id="sheetTabGroup"
+			  role="tablist"
+			  aria-label="Motorcycle Models"
+			>
+			  <!-- ADV 175 -->
+			  <button 
+				type="button" 
+				role="tab"
+				aria-selected="false"
+				id="tab-adv175"
+				aria-controls="partsGrid"
+				onclick="switchSheetTab(event, 'ADV 175')" 
+				data-tab="ADV 175" 
+				class="sheet-tab-btn min-h-[48px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500"
+			  >
+				<span class="flex items-center gap-2">
+				  <span class="w-2.5 h-2.5 rounded-full bg-slate-600" aria-hidden="true"></span>
+				  MOTORSTAR ADV 175
+				</span>
+				<span class="text-[10px] text-slate-500 font-mono">[Tab 1]</span>
+			  </button>
 
-            <button 
-              type="button" 
-              onclick="switchSheetTab(event, 'TVX 150')" 
-              data-tab="TVX 150" 
-              class="sheet-tab-btn min-h-[44px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition"
-            >
-              <span class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-slate-600"></span>
-                MOTORSTAR TVX 150
-              </span>
-              <span class="text-[10px] text-slate-500 font-mono">[Tab 2]</span>
-            </button>
+			  <!-- TVX 150 -->
+			  <button 
+				type="button" 
+				role="tab"
+				aria-selected="false"
+				id="tab-tvx150"
+				aria-controls="partsGrid"
+				onclick="switchSheetTab(event, 'TVX 150')" 
+				data-tab="TVX 150" 
+				class="sheet-tab-btn min-h-[48px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500"
+			  >
+				<span class="flex items-center gap-2">
+				  <span class="w-2.5 h-2.5 rounded-full bg-slate-600" aria-hidden="true"></span>
+				  MOTORSTAR TVX 150
+				</span>
+				<span class="text-[10px] text-slate-500 font-mono">[Tab 2]</span>
+			  </button>
 
-            <button 
-              type="button" 
-              onclick="switchSheetTab(event, 'Griffin 180i')" 
-              data-tab="Griffin 180i" 
-              class="sheet-tab-btn min-h-[44px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition"
-            >
-              <span class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-slate-600"></span>
-                EURO MOTOR GRIFFIN 180I
-              </span>
-              <span class="text-[10px] text-slate-500 font-mono">[Tab 3]</span>
-            </button>
-          </div>
+			  <!-- Griffin 180i -->
+			  <button 
+				type="button" 
+				role="tab"
+				aria-selected="false"
+				id="tab-griffin180i"
+				aria-controls="partsGrid"
+				onclick="switchSheetTab(event, 'Griffin 180i')" 
+				data-tab="Griffin 180i" 
+				class="sheet-tab-btn min-h-[48px] px-3.5 py-2.5 rounded-xl border border-race-border bg-[#161a25] text-slate-300 hover:text-white font-semibold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500"
+			  >
+				<span class="flex items-center gap-2">
+				  <span class="w-2.5 h-2.5 rounded-full bg-slate-600" aria-hidden="true"></span>
+				  EURO MOTOR GRIFFIN 180I
+				</span>
+				<span class="text-[10px] text-slate-500 font-mono">[Tab 3]</span>
+			  </button>
+			</div>
         </div>
 
         <!-- ROW 2: ACTIVE TAB SUBSYSTEM CATEGORIES (TOUCH SCROLLABLE ON MOBILE) -->
@@ -227,12 +253,13 @@
               <label class="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">Subsystem Categories</label>
             </div>
             <button 
-              type="button" 
-              onclick="resetActiveTabFilters()" 
-              class="text-[11px] font-mono text-slate-400 hover:text-rose-400 transition flex items-center gap-1 active:scale-95"
-            >
-              <i class="ph ph-arrow-counter-clockwise"></i> Reset
-            </button>
+			  type="button" 
+			  onclick="resetActiveTabFilters()" 
+			  aria-label="Reset subsystem category filters"
+			  class="text-[11px] font-mono text-slate-400 hover:text-rose-400 transition flex items-center gap-1.5 min-h-[44px] px-2 active:scale-95"
+			>
+			  <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i> Reset
+			</button>
           </div>
 
           <!-- Horizontally scrollable on mobile for seamless navigation -->
@@ -244,10 +271,16 @@
 
       </div>
 
-      <!-- Parts Grid Container -->
+      <!-- Parts Grid Container (Visible on load with Motorcycle Picker Prompt) -->
       <div id="partsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 min-h-[300px]">
-        <div class="col-span-full py-16 text-center text-slate-500 font-mono text-xs border border-dashed border-race-border rounded-2xl bg-race-card/40">
-          FETCHING DATA FOR ACTIVE SHEET TAB...
+        <div class="col-span-full py-16 px-4 text-center text-slate-400 font-mono text-xs border border-dashed border-amber-500/40 rounded-2xl bg-amber-500/5 flex flex-col items-center justify-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl shadow-inner">
+            <i class="ph-bold ph-cursor-click"></i>
+          </div>
+          <div class="space-y-1">
+            <span class="text-white font-bold text-sm sm:text-base block uppercase tracking-wider">Select Your Motorcycle Model</span>
+            <span class="text-slate-400 text-xs block max-w-md mx-auto">Click on <strong>Motorstar ADV 175</strong>, <strong>TVX 150</strong>, or <strong>Griffin 180i</strong> above to load its verified parts registry.</span>
+          </div>
         </div>
       </div>
 
@@ -336,15 +369,34 @@
           </div>
 
           <div>
-            <label class="text-xs text-slate-400 block mb-1">CATEGORY (COL A)</label>
-            <select id="partCategory" name="category" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" required>
+            <label class="text-xs text-slate-400 block mb-1">
+              CATEGORY (COL A) <span class="text-rose-500 font-bold">*</span>
+            </label>
+            <select 
+              id="partCategory" 
+              name="category" 
+              class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500 transition" 
+              onchange="handleCategorySelect(this.value)"
+              required
+            >
               <option value="CVT & Transmission">CVT & Transmission</option>
               <option value="Electrical & Stator">Electrical & Stator</option>
               <option value="Braking System">Braking System</option>
               <option value="Engine & Cylinder">Engine & Cylinder</option>
               <option value="Suspension & Chassis">Suspension & Chassis</option>
               <option value="Fuel System & Intake">Fuel System & Intake</option>
+              <option value="__NEW_CATEGORY__" class="text-amber-400 font-bold">+ Other / Create New Category...</option>
             </select>
+			<!-- Custom Category Input (Hidden until "+ Other" is picked) -->
+            <div id="newCategoryWrapper" class="hidden mt-2">
+              <input 
+                type="text" 
+                id="customCategoryInput" 
+                placeholder="Enter new subsystem name..." 
+                class="w-full bg-[#10131c] border border-amber-500/50 rounded-xl px-3.5 py-2.5 text-base sm:text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-amber-400 font-mono"
+                autocomplete="off"
+              >
+            </div>
           </div>
 
           <div>
@@ -374,17 +426,24 @@
         <!-- Row 3: Product Link, Direct Image URL, Price SRP -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
           <div>
-            <label class="text-xs text-slate-400 block mb-1">PURCHASE LINK / URL (COL G)</label>
+            <label class="text-xs text-slate-400 block mb-1">
+              PURCHASE LINK / URL (COL G) <span class="text-rose-500 font-bold">*</span>
+            </label>
             <input type="url" id="partLink" name="link" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" placeholder="https://shopee.ph/..." required autocomplete="off">
           </div>
 
           <div>
-            <label class="text-xs text-slate-400 block mb-1">IMAGE URL (COL H)</label>
-            <input type="url" id="partImage" name="image" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" placeholder="https://images.unsplash.com/..." required autocomplete="off">
+            <label class="text-xs text-slate-400 block mb-1">
+              IMAGE URL (COL H) <span class="text-slate-500 text-[10px]">(OPTIONAL)</span>
+            </label>
+            <!-- REMOVED 'required' BELOW -->
+            <input type="url" id="partImage" name="image" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" placeholder="https://images.unsplash.com/... (leave blank for default)" autocomplete="off">
           </div>
 
           <div>
-            <label class="text-xs text-slate-400 block mb-1">ESTIMATE SRP / PRICE (₱) (COL I)</label>
+            <label class="text-xs text-slate-400 block mb-1">
+              ESTIMATE SRP / PRICE (₱) (COL I) <span class="text-rose-500 font-bold">*</span>
+            </label>
             <input type="number" id="partPrice" name="price" step="1" min="0" class="w-full bg-[#161a25] border border-race-border rounded-xl px-3.5 py-3 text-base sm:text-xs text-slate-200 focus:outline-none focus:border-rose-500" placeholder="1250" required autocomplete="off">
           </div>
         </div>
@@ -408,7 +467,14 @@
   </main>
 
   <!-- ==================== SPECIFICATIONS MODAL (MOBILE RESPONSIVE) ==================== -->
-  <div id="specsModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden opacity-0 transition-opacity duration-300">
+  <div 
+	  id="specsModal" 
+	  role="dialog"
+	  aria-modal="true"
+	  aria-labelledby="modalTitle"
+	  aria-describedby="modalDesc"
+	  class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 hidden opacity-0 transition-opacity duration-300"
+	>
     <div class="bg-race-card border border-race-border w-full max-w-xl max-h-[90vh] flex flex-col rounded-2xl overflow-hidden shadow-2xl transform scale-95 transition-transform duration-300" id="modalBox">
       
       <!-- Modal Header -->
@@ -422,9 +488,14 @@
             <p id="modalSubtitle" class="text-[11px] text-slate-400 font-mono">Paddock Interchange Specs</p>
           </div>
         </div>
-        <button onclick="closeSpecsModal()" class="w-9 h-9 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white flex items-center justify-center transition active:scale-95" aria-label="Close modal">
-          <i class="ph-bold ph-x text-lg"></i>
-        </button>
+        <button 
+		  id="closeModalBtn"
+		  onclick="closeSpecsModal()" 
+		  class="w-11 h-11 rounded-lg bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white flex items-center justify-center transition active:scale-95" 
+		  aria-label="Close dialog"
+		>
+		  <i class="ph-bold ph-x text-lg" aria-hidden="true"></i>
+		</button>
       </div>
 
       <!-- Modal Body (Independently Scrollable) -->
@@ -463,13 +534,22 @@
 
       <!-- Modal Footer -->
       <div class="p-4 bg-[#11141c] border-t border-race-border flex items-center justify-between gap-3 font-mono shrink-0">
-        <button onclick="closeSpecsModal()" class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-xs font-medium text-slate-300 bg-white/5 hover:bg-white/10 transition active:scale-95 text-center">
-          Close
-        </button>
-        <a id="modalShopBtn" href="#" target="_blank" rel="noopener noreferrer" class="flex-1 sm:flex-none px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/30 active:scale-95">
-          <span>Check Price / Buy</span>
-          <i class="ph-bold ph-arrow-up-right text-xs"></i>
-        </a>
+        <button 
+		  onclick="closeSpecsModal()" 
+		  class="flex-1 sm:flex-none min-h-[44px] px-4 py-2.5 rounded-xl text-xs font-medium text-slate-300 bg-white/5 hover:bg-white/10 transition active:scale-95 text-center"
+		>
+		  Close
+		</button>
+		<a 
+		  id="modalShopBtn" 
+		  href="#" 
+		  target="_blank" 
+		  rel="noopener noreferrer" 
+		  class="flex-1 sm:flex-none min-h-[44px] px-5 py-2.5 rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-500 text-white transition flex items-center justify-center gap-1.5 shadow-md shadow-rose-600/30 active:scale-95"
+		>
+		  <span>Check Price / Shopee</span>
+		  <i class="ph-bold ph-arrow-up-right text-xs" aria-hidden="true"></i>
+</a>
       </div>
 
     </div>
@@ -480,7 +560,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
       <div class="flex items-center justify-center sm:justify-start gap-2">
         <div class="w-6 h-6 rounded bg-rose-600 flex items-center justify-center text-white font-bold text-xs">E</div>
-        <span class="text-slate-200 font-bold">ENDGAME GY6HUB</span>
+        <span class="text-slate-200 font-bold">Ultimate MotoHub</span>
         <span>• Multi-Tab Edition</span>
       </div>
       <p class="text-slate-500">
