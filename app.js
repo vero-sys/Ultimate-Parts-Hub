@@ -1,6 +1,6 @@
 /**
  * ==============================================================================
- * ENDGAME GY6HUB // PADDOCK RACE SPEC & MULTI-TAB ARCHITECTURE
+ * The Ultimate Compatible Parts Hub for Non Big-4 Motorcycles
  * SCRIPT: app.js
  * ==============================================================================
  */
@@ -14,56 +14,14 @@ let ACTIVE_PARTS = [];
 let currentActiveTab = null;
 let currentCategory = 'all';
 let searchQuery = '';
+let isModelDrawerExpanded = false;
 let lastFocusedElement = null; // Accessibility: stores element to return focus after modal closes
 
 const SPREADSHEET_ID = '1gPudHIe2v5fHUnXyXQB43u0pVG3u05tNDjlbcaFqPiY';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbynjptVaj4ftkoSxjFrOzUrO1E0lttZ_7nMcCgq0UQ-nlXHTuEMKJvAX0cgErVZGh6E/exec';
 
-const KNOWN_ISSUES = [
-  {
-    id: "issue-1",
-    title: "Transmission Low-Speed Shudder (\"Pang-Gigil\")",
-    category: "CVT & Transmission",
-    severity: "Common / Street Wear",
-    symptoms: "Heavy handlebar shaking and clutch judder between 0 to 20 km/h, disappearing once speed stabilizes.",
-    rootCause: "Glazed friction pads and molten drive belt dust compacted inside the bell friction track.",
-    solution: "1. Clean drum thoroughly with non-chlorinated brake cleaner.<br>2. De-glaze friction shoes using 240-grit emery sandpaper.<br>3. Replace solid bell with a grooved/vented race bell to clear belt debris automatically.",
-    recommendedPart: "Grooved & Vented Clutch Bell"
-  },
-  {
-    id: "issue-2",
-    title: "Brake Sponge & Thermal Vapor Lock on Descents",
-    category: "Braking System",
-    severity: "Safety Critical",
-    symptoms: "Brake lever pulls back close to the throttle under heavy downhill riding; lever feels soft and spongy.",
-    rootCause: "Moisture-contaminated DOT 3/4 brake fluid boiling under repeated hard trail braking, creating vapor pockets.",
-    solution: "1. Flush hydraulic lines with DOT 5.1 high-temperature racing brake fluid (260°C dry boiling point).<br>2. Replace warped solid rotor with a 260mm floating wave disc to accommodate thermal expansion.",
-    recommendedPart: "Floating Wave Stainless Disc Rotor"
-  },
-  {
-    id: "issue-3",
-    title: "Stator & Rectifier Overheating / Cut-Off",
-    category: "Electrical & Stator",
-    severity: "Critical",
-    symptoms: "Sudden instrument reset, battery failing to charge past 12.4V, or charred regulator wiring harness.",
-    rootCause: "High-resistance engine-to-frame grounding and auxiliary LED load overheating OEM shunt regulator fins.",
-    solution: "1. Run an 8 AWG direct engine-to-frame grounding bridge.<br>2. Replace stock rectifier with a solid-state MOSFET unit relocated to direct front airflow.",
-    recommendedPart: "Heavy-Duty MOSFET Regulator"
-  },
-  {
-    id: "issue-4",
-    title: "Premature Drive Belt Shredding & Edge Wear",
-    category: "CVT & Transmission",
-    severity: "Stoppage Risk",
-    symptoms: "Screeching sound at wide-open throttle, loss of top speed, rubber powder inside the crankcase cover.",
-    rootCause: "Worn variator slider guides tilting the pulley face, or using improperly sized aftermarket flyballs.",
-    solution: "1. Inspect variator face for stepped ridges with a straight edge.<br>2. Replace the 3 plastic slider guides.<br>3. Torque variator drive nut to 59 Nm using a calibrated torque wrench.",
-    recommendedPart: "Kevlar Aramid Reinforced Drive Belt"
-  }
-];
-
 /* ==========================================================================
-   02. MULTI-TAB GOOGLE SHEETS CONNECTOR (JSONP via sheet name)
+   02. DATA LAYER & GVIZ CONNECTOR (JSONP via sheet name)
    ========================================================================== */
 function fetchSheetTab(tabName) {
   const statusEl = document.getElementById('catalogStatusCounter');
@@ -78,7 +36,7 @@ function fetchSheetTab(tabName) {
     grid.classList.remove('hidden');
     grid.innerHTML = `
       <div class="col-span-full py-16 text-center text-slate-400 font-mono text-xs border border-dashed border-race-border rounded-2xl bg-race-card/40">
-        CONNECTING TO GOOGLE SHEETS // TAB: ${tabName}...
+        CONNECTING TO DATABASE // TAB: ${tabName}...
       </div>
     `;
   }
@@ -154,13 +112,38 @@ window.handleSheetData = function(json) {
 };
 
 /* ==========================================================================
-   03. TAB SWITCHER & CATEGORY DISCOVERY
+   03. MODEL SELECTION & COLLAPSIBLE DRAWER
    ========================================================================== */
+function toggleMotorcycleDrawer(forceState = null) {
+  const wrapper = document.getElementById('sheetTabWrapper');
+  const btn = document.getElementById('toggleModelsBtn');
+  const icon = document.getElementById('modelsToggleIcon');
+  const text = document.getElementById('modelsToggleText');
+  const totalTabs = document.querySelectorAll('#sheetTabGroup .sheet-tab-btn').length;
+
+  if (!wrapper || !btn || !icon || !text) return;
+
+  isModelDrawerExpanded = forceState !== null ? forceState : !isModelDrawerExpanded;
+
+  if (isModelDrawerExpanded) {
+    wrapper.style.maxHeight = wrapper.scrollHeight + 'px';
+    icon.classList.add('rotate-180');
+    text.textContent = 'Collapse';
+    btn.setAttribute('aria-expanded', 'true');
+  } else {
+    wrapper.style.maxHeight = '58px';
+    icon.classList.remove('rotate-180');
+    text.textContent = currentActiveTab ? `${currentActiveTab} (Change)` : `All Models (${totalTabs})`;
+    btn.setAttribute('aria-expanded', 'false');
+  }
+}
+
 function switchSheetTab(e, tabName) {
   if (e && e.preventDefault) {
     e.preventDefault();
   }
 
+  // Support invocation passing raw string as first argument
   if (typeof e === 'string' && !tabName) {
     tabName = e;
   }
@@ -169,28 +152,47 @@ function switchSheetTab(e, tabName) {
   currentCategory = 'all';
   searchQuery = '';
 
-  // Remove the attention-seeking border from the tab container
-  const tabGroup = document.getElementById('sheetTabGroup');
-  if (tabGroup) {
-    tabGroup.classList.remove('model-prompt-highlight');
+  // Deactivate initial prompt beacon once a model is selected
+  const toggleBtn = document.getElementById('toggleModelsBtn');
+  const beacon = document.getElementById('modelPromptBeacon');
+  if (toggleBtn) {
+    toggleBtn.className = 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono font-bold bg-[#161a25] hover:bg-[#202636] border border-race-border text-slate-300 hover:text-white transition-all active:scale-95 focus:ring-2 focus:ring-rose-500';
+  }
+  if (beacon) {
+    beacon.classList.add('hidden');
   }
 
+  // Reflect selected model in the toggle button label when collapsed
+  const toggleText = document.getElementById('modelsToggleText');
+  if (toggleText && !isModelDrawerExpanded) {
+    toggleText.textContent = `${tabName} (Change)`;
+  }
+
+  // Auto-collapse drawer on mobile to conserve screen space for parts
+  if (isModelDrawerExpanded && window.innerWidth < 768) {
+    toggleMotorcycleDrawer(false);
+  }
+
+  // Clear search fields on tab change
   const dInput = document.getElementById('desktopSearchInput');
   const mInput = document.getElementById('mobileSearchInput');
   if (dInput) dInput.value = '';
   if (mInput) mInput.value = '';
 
-  // Hide pioneer fallback until renderCatalog evaluates results
+  // Reset fallback archive box
   const pioneerBox = document.getElementById('advPioneerFallback');
   if (pioneerBox) {
     pioneerBox.classList.add('hidden');
   }
 
-  // Update Submission form dropdown match
+  // Sync submission form target model
   const submitSelect = document.getElementById('targetSheetTab');
   if (submitSelect) submitSelect.value = tabName;
 
-  // Accessibility: Update Tab Switcher UI styling and aria-selected states
+  // Update ARIA tab states, visual styles, and move active tab to slot 1
+  const group = document.getElementById('sheetTabGroup');
+  let selectedButton = null;
+
   document.querySelectorAll('#sheetTabGroup .sheet-tab-btn').forEach(btn => {
     const isTarget = btn.getAttribute('data-tab') === tabName;
     const dot = btn.querySelector('.rounded-full');
@@ -199,6 +201,7 @@ function switchSheetTab(e, tabName) {
     btn.setAttribute('aria-selected', isTarget ? 'true' : 'false');
 
     if (isTarget) {
+      selectedButton = btn;
       btn.className = 'sheet-tab-btn min-h-[48px] px-3.5 py-2.5 rounded-xl border border-rose-500/40 bg-rose-500/10 text-white font-bold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500';
       if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-rose-500';
       if (tabNum) tabNum.className = 'text-[10px] text-rose-400 opacity-80 font-mono';
@@ -209,9 +212,17 @@ function switchSheetTab(e, tabName) {
     }
   });
 
+  // Reorder active tab to the very top so it stays in view when collapsed
+  if (selectedButton && group && group.firstElementChild !== selectedButton) {
+    group.prepend(selectedButton);
+  }
+
   fetchSheetTab(tabName);
 }
 
+/* ==========================================================================
+   04. CATEGORY FILTERING & DYNAMIC OVERFLOW
+   ========================================================================== */
 function discoverTabCategories() {
   const container = document.getElementById('categoryFilterContainer');
   if (!container) return;
@@ -233,6 +244,8 @@ function discoverTabCategories() {
       </button>
     `).join('')}
   `;
+
+  updateCategoryScrollFade(container);
 }
 
 function filterCategory(cat) {
@@ -260,6 +273,49 @@ function resetActiveTabFilters() {
   filterCategory('all');
 }
 
+function updateCategoryScrollFade(el) {
+  if (window.innerWidth >= 640) return;
+
+  const maxScrollLeft = el.scrollWidth - el.clientWidth;
+  
+  if (maxScrollLeft <= 5) {
+    el.classList.remove('scroll-fade-right', 'scroll-fade-both', 'scroll-fade-left');
+    return;
+  }
+
+  const atStart = el.scrollLeft <= 10;
+  const atEnd = el.scrollLeft >= maxScrollLeft - 10;
+
+  el.classList.remove('scroll-fade-right', 'scroll-fade-both', 'scroll-fade-left');
+
+  if (atStart) {
+    el.classList.add('scroll-fade-right');
+  } else if (atEnd) {
+    el.classList.add('scroll-fade-left');
+  } else {
+    el.classList.add('scroll-fade-both');
+  }
+}
+
+function handleCategorySelect(val) {
+  const wrapper = document.getElementById('newCategoryWrapper');
+  const customInput = document.getElementById('customCategoryInput');
+  if (!wrapper || !customInput) return;
+
+  if (val === '__NEW_CATEGORY__') {
+    wrapper.classList.remove('hidden');
+    customInput.required = true;
+    customInput.focus();
+  } else {
+    wrapper.classList.add('hidden');
+    customInput.required = false;
+    customInput.value = '';
+  }
+}
+
+/* ==========================================================================
+   05. CATALOG DISPLAY & SEARCH LOGIC
+   ========================================================================== */
 function handleSearch(val) {
   searchQuery = val;
   const dInput = document.getElementById('desktopSearchInput');
@@ -269,9 +325,6 @@ function handleSearch(val) {
   renderCatalog();
 }
 
-/* ==========================================================================
-   04. CATALOG RENDERING & EMPTY STATE ARCHIVE
-   ========================================================================== */
 function renderCatalog() {
   const grid = document.getElementById('partsGrid');
   const noResults = document.getElementById('noResultsNotice');
@@ -279,7 +332,6 @@ function renderCatalog() {
   const counter = document.getElementById('catalogStatusCounter');
   if (!grid) return;
 
-  // Guard: If no bike is picked yet, do not trigger the "No parts found" notice
   if (!currentActiveTab) {
     if (counter) {
       counter.textContent = 'PLEASE SELECT A MOTORCYCLE MODEL';
@@ -310,7 +362,6 @@ function renderCatalog() {
     counter.textContent = `SHOWING ${filtered.length} OF ${ACTIVE_PARTS.length} [TAB: ${currentActiveTab.toUpperCase()}]`;
   }
 
-  // Handle No Results State only when a tab is actively loaded
   if (filtered.length === 0) {
     grid.innerHTML = '';
     grid.classList.add('hidden');
@@ -329,7 +380,6 @@ function renderCatalog() {
     return;
   }
 
-  // When parts exist, show the grid
   grid.classList.remove('hidden');
   if (noResults) noResults.classList.add('hidden');
   if (pioneerBox) pioneerBox.classList.add('hidden');
@@ -404,96 +454,12 @@ function renderCatalog() {
 }
 
 /* ==========================================================================
-   05. FIELD DIAGNOSTICS & ACCORDIONS
-   ========================================================================== */
-function renderIssues() {
-  const container = document.getElementById('issuesContainer');
-  if (!container) return;
-
-  container.innerHTML = KNOWN_ISSUES.map(issue => `
-    <div class="rounded-xl border border-race-border bg-race-card overflow-hidden transition-all">
-      <button 
-        type="button" 
-        onclick="toggleAccordion('${issue.id}')" 
-        class="w-full text-left p-4 sm:p-5 flex items-center justify-between gap-3 hover:bg-white/[0.02] transition active:bg-white/5 focus:ring-2 focus:ring-rose-500"
-        aria-expanded="false"
-        aria-controls="content-${issue.id}"
-      >
-        <div class="flex items-start sm:items-center gap-3">
-          <div class="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-500 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0" aria-hidden="true">
-            <i class="ph-bold ph-warning text-lg"></i>
-          </div>
-          <div>
-            <div class="flex flex-wrap items-center gap-1.5 mb-1 font-mono">
-              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">
-                ${issue.category}
-              </span>
-              <span class="text-[10px] font-semibold text-rose-400">
-                ${issue.severity}
-              </span>
-            </div>
-            <h3 class="text-xs sm:text-base font-bold text-white font-mono">${issue.title}</h3>
-          </div>
-        </div>
-        <i class="ph ph-caret-down text-lg text-slate-400 transition-transform duration-300 shrink-0" id="icon-${issue.id}" aria-hidden="true"></i>
-      </button>
-
-      <div id="content-${issue.id}" class="hidden border-t border-race-border p-4 sm:p-5 bg-[#0f111a] text-xs sm:text-sm space-y-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 font-mono">
-          <div class="bg-[#151924] p-3.5 rounded-lg border border-race-border">
-            <div class="text-[11px] font-bold uppercase tracking-wider text-rose-400 mb-1 flex items-center gap-1.5">
-              <i class="ph-bold ph-waveform" aria-hidden="true"></i> Symptoms
-            </div>
-            <p class="text-slate-300 leading-relaxed text-xs">${issue.symptoms}</p>
-          </div>
-
-          <div class="bg-[#151924] p-3.5 rounded-lg border border-race-border">
-            <div class="text-[11px] font-bold uppercase tracking-wider text-amber-400 mb-1 flex items-center gap-1.5">
-              <i class="ph-bold ph-magnifying-glass" aria-hidden="true"></i> Root Cause
-            </div>
-            <p class="text-slate-300 leading-relaxed text-xs">${issue.rootCause}</p>
-          </div>
-        </div>
-
-        <div class="bg-[#151924] p-3.5 sm:p-4 rounded-lg border border-race-border space-y-2">
-          <div class="text-[11px] font-bold font-mono uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-            <i class="ph-bold ph-wrench" aria-hidden="true"></i> Field Fix Procedure
-          </div>
-          <div class="text-slate-300 leading-relaxed text-xs font-mono space-y-1">
-            ${issue.solution}
-          </div>
-        </div>
-      </div>
-    </div>
-  `).join('');
-}
-
-function toggleAccordion(id) {
-  const content = document.getElementById(`content-${id}`);
-  const icon = document.getElementById(`icon-${id}`);
-  const triggerBtn = document.querySelector(`button[aria-controls="content-${id}"]`);
-  if (!content) return;
-
-  const isExpanded = content.classList.contains('hidden');
-  if (isExpanded) {
-    content.classList.remove('hidden');
-    if (icon) icon.classList.add('rotate-180');
-    if (triggerBtn) triggerBtn.setAttribute('aria-expanded', 'true');
-  } else {
-    content.classList.add('hidden');
-    if (icon) icon.classList.remove('rotate-180');
-    if (triggerBtn) triggerBtn.setAttribute('aria-expanded', 'false');
-  }
-}
-
-/* ==========================================================================
    06. SPECIFICATIONS BLUEPRINT MODAL (ACCESSIBLE & FOCUS TRAPPED)
    ========================================================================== */
 function openSpecsModal(partId) {
   const part = ACTIVE_PARTS.find(p => p.id === partId);
   if (!part) return;
 
-  // Save the currently focused element to return focus after modal closes
   lastFocusedElement = document.activeElement;
 
   const setElText = (id, text) => {
@@ -532,7 +498,6 @@ function openSpecsModal(partId) {
   setTimeout(() => {
     modal.classList.remove('opacity-0');
     box.classList.remove('scale-95');
-    // Shift keyboard & screen reader focus inside the dialog to the Close button
     const closeBtn = document.getElementById('closeModalBtn') || modal.querySelector('button');
     if (closeBtn) closeBtn.focus();
   }, 40);
@@ -547,7 +512,6 @@ function closeSpecsModal() {
   box.classList.add('scale-95');
   setTimeout(() => {
     modal.classList.add('hidden');
-    // Accessibility: Return focus back to the button that opened the modal
     if (lastFocusedElement && typeof lastFocusedElement.focus === 'function') {
       lastFocusedElement.focus();
     }
@@ -557,9 +521,9 @@ function closeSpecsModal() {
 /* ==========================================================================
    07. NAVIGATION & UTILITIES
    ========================================================================== */
-function scrollToSection(id) {
-  const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: 'smooth' });
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function toggleMobileMenu() {
@@ -567,26 +531,42 @@ function toggleMobileMenu() {
   if (menu) menu.classList.toggle('hidden');
 }
 
+function handleScrollTopVisibility() {
+  const btn = document.getElementById('scrollTopBtn');
+  if (!btn) return;
+
+  // Reveal when user scrolls down past 400px
+  if (window.scrollY > 400) {
+    btn.classList.remove('translate-y-16', 'opacity-0', 'pointer-events-none');
+    btn.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+  } else {
+    btn.classList.add('translate-y-16', 'opacity-0', 'pointer-events-none');
+    btn.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+  }
+}
+
 /* ==========================================================================
-   08. INITIALIZATION & SINGLE DISPATCHER SETUP
+   08. INITIALIZATION, FORM DISPATCHER & EVENT HANDLERS
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
-  renderIssues();
-
-  // Highlight tab switcher on load to guide the user
-  const tabGroup = document.getElementById('sheetTabGroup');
-  if (tabGroup) {
-    tabGroup.classList.add('model-prompt-highlight');
+  // ------------------------------------------------------------------------
+  // 08.1 Bootstrap UI State & Drawer Indicators
+  // ------------------------------------------------------------------------
+  const totalTabs = document.querySelectorAll('#sheetTabGroup .sheet-tab-btn').length;
+  const toggleText = document.getElementById('modelsToggleText');
+  if (toggleText && totalTabs > 0) {
+    toggleText.textContent = `All Models (${totalTabs})`;
   }
-  
-  // Set initial status prompt
+
   const counter = document.getElementById('catalogStatusCounter');
   if (counter) {
     counter.textContent = 'PLEASE SELECT A MOTORCYCLE MODEL';
     counter.className = 'text-[10px] sm:text-[11px] font-mono text-amber-400 font-bold';
   }
 
-  // Unified 9-Column Submission Form Dispatcher
+  // ------------------------------------------------------------------------
+  // 08.2 Unified 9-Column Submission Form Dispatcher
+  // ------------------------------------------------------------------------
   const form = document.getElementById('compatSubmitForm');
   if (form) {
     form.addEventListener('submit', async function(e) {
@@ -594,10 +574,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('submitPartBtn');
       const status = document.getElementById('submissionStatus');
 
+      // A. Mandatory Field Validation: Purchase Link
       const linkVal = document.getElementById('partLink').value.trim();
-      const rawImage = document.getElementById('partImage').value.trim();
-
-      // Client-side guard: purchase link is mandatory
       if (!linkVal) {
         status.textContent = 'ERR: PURCHASE LINK IS REQUIRED';
         status.className = 'text-xs text-rose-500 font-mono';
@@ -605,17 +583,35 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Default placeholder image if no image URL was provided
+      // B. Dynamic Category Resolution (Standard Dropdown vs Custom Input)
+      let categoryVal = document.getElementById('partCategory').value.trim();
+      if (categoryVal === '__NEW_CATEGORY__') {
+        const customCatInput = document.getElementById('customCategoryInput');
+        const customVal = customCatInput ? customCatInput.value.trim() : '';
+
+        if (!customVal) {
+          status.textContent = 'ERR: PLEASE ENTER A NEW CATEGORY NAME';
+          status.className = 'text-xs text-rose-500 font-mono';
+          if (customCatInput) customCatInput.focus();
+          return;
+        }
+        categoryVal = customVal;
+      }
+
+      // C. Optional Image Resolution with Safe Placeholder Fallback
+      const rawImage = document.getElementById('partImage').value.trim();
       const defaultPlaceholder = 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=600&q=80';
       const imageVal = rawImage.startsWith('http') ? rawImage : defaultPlaceholder;
 
+      // D. Dispatch Lock
       btn.disabled = true;
       status.textContent = 'COMMITTING TO TARGET TAB...';
       status.className = 'text-xs text-amber-400 font-mono';
 
+      // E. Payload Assembly (Exact 9-Column Architecture)
       const payload = {
         sheetTab: document.getElementById('targetSheetTab').value,
-        category: document.getElementById('partCategory').value.trim(),
+        category: categoryVal,
         name: document.getElementById('partName').value.trim(),
         specs: document.getElementById('partSpecs').value.trim(),
         compatibility: document.getElementById('partCompatibility').value.trim(),
@@ -626,6 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
         price: parseFloat(document.getElementById('partPrice').value) || 0
       };
 
+      // F. Remote Transmission to Google Apps Script
       try {
         if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL.includes('PASTE_YOUR')) {
           throw new Error('Configure your Google Apps Script URL in app.js');
@@ -642,10 +639,11 @@ document.addEventListener('DOMContentLoaded', () => {
           status.textContent = `SUCCESSFULLY LOGGED TO TAB: ${payload.sheetTab}`;
           status.className = 'text-xs text-emerald-400 font-mono';
           form.reset();
-		  
-		  // Reset custom category field visibility
+
+          // Reset custom category field visibility
           handleCategorySelect(document.getElementById('partCategory').value);
-          
+
+          // Live reload active catalog if committed to the currently selected model
           if (payload.sheetTab === currentActiveTab) {
             fetchSheetTab(currentActiveTab);
           }
@@ -661,39 +659,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Hotkeys: Escape closes modal, "/" focuses instant search
+  // ------------------------------------------------------------------------
+  // 08.3 Keyboard Shortcuts & Focus Controls (WCAG 2.1.1 / 2.1.2)
+  // ------------------------------------------------------------------------
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closeSpecsModal();
+    // ESC closes modal and restores previous focus
+    if (e.key === 'Escape') {
+      closeSpecsModal();
+    }
+
+    // "/" triggers instant search without capturing input inside active text fields
     if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
       e.preventDefault();
       document.getElementById('desktopSearchInput')?.focus();
     }
   });
 
-  // Modal Backdrop Click Dismiss
+  // ------------------------------------------------------------------------
+  // 08.4 Modal Overlay Click Dismissal
+  // ------------------------------------------------------------------------
   const modal = document.getElementById('specsModal');
   if (modal) {
     modal.addEventListener('click', (e) => {
-      if (e.target.id === 'specsModal') closeSpecsModal();
+      if (e.target.id === 'specsModal') {
+        closeSpecsModal();
+      }
     });
   }
+
+  // ------------------------------------------------------------------------
+  // 08.5 Floating Scroll-To-Top Event Handler
+  // ------------------------------------------------------------------------
+  window.addEventListener('scroll', handleScrollTopVisibility, { passive: true });
 });
-
-/* ==========================================================================
-   CATEGORY DROPDOWN & CUSTOM INPUT TOGGLE
-   ========================================================================== */
-function handleCategorySelect(val) {
-  const wrapper = document.getElementById('newCategoryWrapper');
-  const customInput = document.getElementById('customCategoryInput');
-  if (!wrapper || !customInput) return;
-
-  if (val === '__NEW_CATEGORY__') {
-    wrapper.classList.remove('hidden');
-    customInput.required = true;
-    customInput.focus();
-  } else {
-    wrapper.classList.add('hidden');
-    customInput.required = false;
-    customInput.value = '';
-  }
-}
