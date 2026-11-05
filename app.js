@@ -19,14 +19,13 @@ let lastFocusedElement = null;
 
 const SPREADSHEET_ID = '1gPudHIe2v5fHUnXyXQB43u0pVG3u05tNDjlbcaFqPiY';
 const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbynjptVaj4ftkoSxjFrOzUrO1E0lttZ_7nMcCgq0UQ-nlXHTuEMKJvAX0cgErVZGh6E/exec';
-
-// The labels match your actual Google Sheet Tab names directly
 const REGISTERED_MODELS = [
-  'TVX 150',
-  'ADV 175',
-  'Griffin 180i',
-  'ADVX 150i',
-  'RUSI RFI'
+  'MOTORSTAR TVX 150',
+  'MOTORSTAR ADV 175',
+  'EURO Griffin 180i',
+  'RUSI ADVX 150i',
+  'RUSI RFI',
+  'SKYGO BOLT 150'
 ];
 
 /* ==========================================================================
