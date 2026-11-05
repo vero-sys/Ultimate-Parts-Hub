@@ -1,3 +1,10 @@
+/**
+ * ==============================================================================
+ * The Ultimate Compatible Parts Hub for Non Big-4 Motorcycles
+ * SCRIPT: app.js
+ * ==============================================================================
+ */
+
 'use strict';
 
 /* ==========================================================================
@@ -184,7 +191,7 @@ function toggleMotorcycleDrawer(forceState = null) {
   } else {
     wrapper.style.maxHeight = '38px';
     if (handleIcon) handleIcon.classList.remove('rotate-180');
-    if (handleText) handleText.textContent = currentActiveTab ? 'Change Model' : `All Models (${totalTabs})`;
+    handleText.textContent = currentActiveTab ? 'Change Model' : `All Models (${totalTabs})`;
     if (handleBtn) handleBtn.setAttribute('aria-expanded', 'false');
   }
 }
@@ -197,10 +204,12 @@ function switchSheetTab(e, tabName) {
   currentCategory = 'all';
   searchQuery = '';
 
+  // Collapse drawer on mobile once a bike is chosen
   if (isModelDrawerExpanded && window.innerWidth < 768) {
     toggleMotorcycleDrawer(false);
   }
 
+  // Clear search inputs
   const dInput = document.getElementById('desktopSearchInput');
   const mInput = document.getElementById('mobileSearchInput');
   if (dInput) dInput.value = '';
@@ -209,9 +218,11 @@ function switchSheetTab(e, tabName) {
   const pioneerBox = document.getElementById('advPioneerFallback');
   if (pioneerBox) pioneerBox.classList.add('hidden');
 
+  // Synchronize submission select tab
   const submitSelect = document.getElementById('targetSheetTab');
   if (submitSelect) submitSelect.value = tabName;
 
+  // Update tab button styles
   const group = document.getElementById('sheetTabGroup');
   let selectedButton = null;
 
@@ -224,7 +235,7 @@ function switchSheetTab(e, tabName) {
 
     if (isTarget) {
       selectedButton = btn;
-      btn.className = 'sheet-tab-btn h-[48px] px-3.5 py-2.5 rounded-xl border border-rose-500/40 bg-rose-500/10 text-white font-bold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500';
+      btn.className = 'sheet-tab-btn h-[38px] px-3 rounded-lg border border-rose-500/40 bg-rose-500/10 text-white font-bold flex items-center justify-between transition focus:ring-2 focus:ring-rose-500';
       if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
       if (tabNum) tabNum.className = 'text-[10px] text-rose-400 opacity-80 font-mono';
     } else {
@@ -234,10 +245,18 @@ function switchSheetTab(e, tabName) {
     }
   });
 
+  // Promote active button to top of stack for neat collapsed preview
   if (selectedButton && group && group.firstElementChild !== selectedButton) {
     group.prepend(selectedButton);
   }
 
+  // Update drawer handle label
+  const handleText = document.getElementById('handleText');
+  if (handleText && !isModelDrawerExpanded) {
+    handleText.textContent = 'Change Model';
+  }
+
+  // Fetch the selected tab
   fetchSheetTab(tabName);
 }
 
@@ -344,18 +363,45 @@ function renderCatalog() {
   const noResults = document.getElementById('noResultsNotice');
   const pioneerBox = document.getElementById('advPioneerFallback');
   const counter = document.getElementById('catalogStatusCounter');
+  const categoryContainer = document.getElementById('categoryFilterContainer');
   if (!grid) return;
 
+  // LANDING PAGE IDLE STATE: When no motorcycle is chosen yet
   if (!currentActiveTab) {
     if (counter) {
       counter.textContent = 'PLEASE SELECT A MOTORCYCLE MODEL';
       counter.className = 'text-[10px] sm:text-[11px] font-mono text-amber-400 font-bold';
     }
+
     if (noResults) noResults.classList.add('hidden');
     if (pioneerBox) pioneerBox.classList.add('hidden');
+
+    // Reset categories to only "All Parts"
+    if (categoryContainer) {
+      categoryContainer.innerHTML = `
+        <button type="button" class="cat-pill shrink-0 min-h-[40px] px-3.5 py-2 rounded-lg font-semibold bg-rose-600 text-white transition">
+          All Parts
+        </button>
+      `;
+    }
+
+    // Paint the initial landing prompt banner
+    grid.classList.remove('hidden');
+    grid.innerHTML = `
+      <div class="col-span-full py-16 px-4 text-center text-slate-400 font-mono text-xs border border-dashed border-amber-500/40 rounded-2xl bg-amber-500/5 flex flex-col items-center justify-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-2xl shadow-inner">
+          <i class="ph-bold ph-cursor-click"></i>
+        </div>
+        <div class="space-y-1">
+          <span class="text-white font-bold text-sm sm:text-base block uppercase tracking-wider">Select Your Motorcycle Model</span>
+          <span class="text-slate-400 text-xs block max-w-md mx-auto">Click on any model from the registry above to load its verified parts masterlist.</span>
+        </div>
+      </div>
+    `;
     return;
   }
 
+  // ACTIVE TAB FILTERING
   const filtered = ACTIVE_PARTS.filter(part => {
     const matchesCat = (currentCategory === 'all') || (part.category || '').toLowerCase() === currentCategory.toLowerCase();
     const q = searchQuery.toLowerCase().trim();
@@ -529,12 +575,20 @@ function handleScrollTopVisibility() {
    09. INITIALIZATION & EVENT HANDLERS
    ========================================================================== */
 document.addEventListener('DOMContentLoaded', () => {
+  
+  // 1. Initialize Dynamic Models Registry (Tabs and Dropdown)
   initDynamicMotorcycleTabs();
 
-  // Automatically select and load TVX 150 tab first
-  switchSheetTab(null, 'TVX 150');
+  // 2. Enforce strict idle landing state (no motorcycle pre-selected)
+  currentActiveTab = null;
+  ACTIVE_PARTS = [];
+  currentCategory = 'all';
+  searchQuery = '';
 
-  // Submit Form Handler
+  // 3. Render idle prompt banner across catalog & status headers
+  renderCatalog();
+
+  // 4. Form Dispatcher
   const form = document.getElementById('compatSubmitForm');
   if (form) {
     form.addEventListener('submit', async function(e) {
@@ -618,7 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Keyboard Shortcuts
+  // 5. Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeSpecsModal();
     if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
@@ -627,7 +681,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Modal Dismissal
+  // 6. Modal Overlay Click Dismissal
   const modal = document.getElementById('specsModal');
   if (modal) {
     modal.addEventListener('click', (e) => {
@@ -635,5 +689,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // 7. Passive Scroll Event Listener for Floating Back-To-Top Button
   window.addEventListener('scroll', handleScrollTopVisibility, { passive: true });
 });
